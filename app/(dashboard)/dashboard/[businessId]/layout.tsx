@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { ExternalLink } from "lucide-react";
 import { BusinessNav } from "@/components/dashboard/business-nav";
+import { CopyLinkButton } from "@/components/dashboard/copy-link-button";
+import { buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { loadOwnedBusiness } from "@/lib/dashboard";
 
@@ -27,14 +29,14 @@ async function BusinessHeader({ params }: Pick<LayoutProps<"/dashboard/[business
           </Link>
           <h1 className="text-2xl font-semibold tracking-tight">{business.name}</h1>
         </div>
-        <Link
-          href={`/b/${business.slug}`}
-          target="_blank"
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          Ver página pública
-          <ExternalLink aria-hidden className="size-3.5" />
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <CopyLinkButton path={`/b/${business.slug}`} />
+          <Link href={`/b/${business.slug}`} target="_blank" className={buttonVariants({ variant: "ghost" })}>
+            Ver página pública
+            <ExternalLink aria-hidden />
+            <span className="sr-only">(se abre en una pestaña nueva)</span>
+          </Link>
+        </div>
       </div>
       <BusinessNav businessId={business.id} />
     </div>

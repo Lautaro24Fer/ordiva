@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Plus, X } from "lucide-react";
+import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,12 +31,12 @@ const withKey = (interval: Interval): Row => ({ ...interval, key: nextKey++ });
 export function HoursEditor({ businessId, hours }: { businessId: number; hours: Interval[] }) {
   const router = useRouter();
   const [rows, setRows] = useState<Row[]>(() => hours.map(withKey));
-  const [message, setMessage] = useState<{ type: "error" | "success"; text: string }>();
+  const [error, setError] = useState<string>();
   const [saving, setSaving] = useState(false);
 
   function update(key: number, patch: Partial<Interval>) {
     setRows((current) => current.map((row) => (row.key === key ? { ...row, ...patch } : row)));
-    setMessage(undefined);
+    setError(undefined);
   }
 
   function add(dayOfWeek: number) {
@@ -46,25 +47,26 @@ export function HoursEditor({ businessId, hours }: { businessId: number; hours: 
       ? { dayOfWeek, startTime: last.endTime, endTime: "20:00" }
       : { dayOfWeek, startTime: "09:00", endTime: "13:00" };
     setRows((current) => [...current, withKey(interval)]);
-    setMessage(undefined);
+    setError(undefined);
   }
 
   function remove(key: number) {
     setRows((current) => current.filter((row) => row.key !== key));
-    setMessage(undefined);
+    setError(undefined);
   }
 
   async function save() {
     const payload = { hours: rows.map(({ dayOfWeek, startTime, endTime }) => ({ dayOfWeek, startTime, endTime })) };
     const parsed = replaceHoursSchema.safeParse(payload);
     if (!parsed.success) {
-      return setMessage({ type: "error", text: parsed.error.issues[0]?.message ?? "Revisá los horarios." });
+      return setError(parsed.error.issues[0]?.message ?? "Revisá los horarios.");
     }
     setSaving(true);
     const result = await apiRequest(`/api/admin/businesses/${businessId}/hours`, "PUT", parsed.data);
     setSaving(false);
-    if (!result.ok) return setMessage({ type: "error", text: result.message });
-    setMessage({ type: "success", text: "Horarios guardados." });
+    if (!result.ok) return setError(result.message);
+    setError(undefined);
+    toast.success("Horarios guardados.");
     router.refresh();
   }
 
@@ -120,9 +122,9 @@ export function HoursEditor({ businessId, hours }: { businessId: number; hours: 
         })}
       </ul>
 
-      {message && (
-        <Alert variant={message.type === "error" ? "destructive" : "default"}>
-          <AlertDescription>{message.text}</AlertDescription>
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 

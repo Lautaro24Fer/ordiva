@@ -20,7 +20,7 @@ export const metadata: Metadata = { title: "Turnos" };
 type Props = PageProps<"/dashboard/[businessId]">;
 
 const STATUS = {
-  CONFIRMED: { label: "Confirmado", variant: "default" },
+  CONFIRMED: { label: "Confirmado", variant: "success" },
   COMPLETED: { label: "Completado", variant: "secondary" },
   CANCELLED: { label: "Cancelado", variant: "outline" },
 } as const;
@@ -53,38 +53,42 @@ async function AppointmentsContent({ params, searchParams }: Pick<Props, "params
             {confirmed} {confirmed === 1 ? "turno confirmado" : "turnos confirmados"}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <nav aria-label="Elegir día" className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
           <Link
             href={`${base}?date=${addLocalDays(date, -1)}`}
             aria-label="Día anterior"
-            className={buttonVariants({ variant: "outline", size: "icon" })}
+            className={buttonVariants({ variant: "outline", size: "icon-lg" })}
           >
             <ChevronLeft aria-hidden />
           </Link>
-          <Link
-            href={base}
-            className={cn(buttonVariants({ variant: "outline" }), date === today && "pointer-events-none opacity-50")}
-          >
-            Hoy
-          </Link>
+          {/* Ya en hoy: botón deshabilitado (no enfocable) en lugar de un link "apagado". */}
+          {date === today ? (
+            <Button variant="outline" size="lg" disabled>
+              Hoy
+            </Button>
+          ) : (
+            <Link href={base} className={buttonVariants({ variant: "outline", size: "lg" })}>
+              Hoy
+            </Link>
+          )}
           <Link
             href={`${base}?date=${addLocalDays(date, 1)}`}
             aria-label="Día siguiente"
-            className={buttonVariants({ variant: "outline", size: "icon" })}
+            className={buttonVariants({ variant: "outline", size: "icon-lg" })}
           >
             <ChevronRight aria-hidden />
           </Link>
           {/* Formulario GET: funciona sin JavaScript. */}
-          <form action={base} className="flex items-center gap-2">
+          <form action={base} className="flex flex-1 items-center gap-2 sm:flex-none">
             <label htmlFor="date" className="sr-only">
               Ir a la fecha
             </label>
-            <Input id="date" name="date" type="date" defaultValue={date} className="w-auto" />
-            <Button type="submit" variant="outline">
+            <Input id="date" name="date" type="date" defaultValue={date} className="h-9 min-w-0 flex-1 sm:w-auto sm:flex-none" />
+            <Button type="submit" variant="outline" size="lg">
               Ir
             </Button>
           </form>
-        </div>
+        </nav>
       </div>
 
       {appointments.length === 0 ? (
@@ -101,7 +105,7 @@ async function AppointmentsContent({ params, searchParams }: Pick<Props, "params
                 key={appointment.id}
                 className={cn(
                   "flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card p-4",
-                  appointment.status === "CANCELLED" && "opacity-60",
+                  appointment.status === "CANCELLED" && "border-dashed bg-muted/40",
                 )}
               >
                 <div className="flex items-start gap-4">

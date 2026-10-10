@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
-import { LogOut } from "lucide-react";
-import { logoutAction } from "@/app/(auth)/actions";
-import { Button } from "@/components/ui/button";
+import { Brand } from "@/components/public/brand";
+import { UserMenu } from "@/components/dashboard/user-menu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Toaster } from "@/components/ui/sonner";
 import { getSession } from "@/lib/session";
 
 export const metadata: Metadata = {
@@ -16,32 +15,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex min-h-full flex-1 flex-col bg-muted/30">
       <header className="border-b bg-background">
-        <div className="mx-auto flex h-14 w-full max-w-4xl items-center justify-between gap-4 px-4">
-          <Link href="/dashboard" className="font-semibold">
-            Panel de turnos
-          </Link>
-          <Suspense fallback={<Skeleton className="h-8 w-32" />}>
-            <UserMenu />
+        <div className="mx-auto flex h-16 w-full max-w-4xl items-center justify-between gap-4 px-4">
+          <div className="flex items-center gap-3">
+            <Brand />
+            <span className="rounded-full border px-2 py-0.5 text-xs text-muted-foreground">Panel</span>
+          </div>
+          <Suspense fallback={<Skeleton className="h-9 w-10 sm:w-56" />}>
+            <AccountMenu />
           </Suspense>
         </div>
       </header>
       <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6 sm:py-8">{children}</main>
+      <Toaster position="top-center" />
     </div>
   );
 }
 
-async function UserMenu() {
+async function AccountMenu() {
   const session = await getSession();
-  if (!session?.user) return null;
-  return (
-    <div className="flex items-center gap-2">
-      <span className="hidden max-w-48 truncate text-sm text-muted-foreground sm:inline">{session.user.email}</span>
-      <form action={logoutAction}>
-        <Button type="submit" variant="ghost" size="sm">
-          <LogOut aria-hidden />
-          Salir
-        </Button>
-      </form>
-    </div>
-  );
+  if (!session?.user?.email) return null;
+  return <UserMenu email={session.user.email} />;
 }

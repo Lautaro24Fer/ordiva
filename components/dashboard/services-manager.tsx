@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,7 +17,8 @@ export function ServicesManager({ businessId, services }: { businessId: number; 
   const [error, setError] = useState<string>();
   const [pending, startTransition] = useTransition();
 
-  function refresh() {
+  function refresh(message: string) {
+    toast.success(message);
     setEditingId(undefined);
     router.refresh();
   }
@@ -30,6 +32,11 @@ export function ServicesManager({ businessId, services }: { businessId: number; 
         : await apiRequest(url, "PATCH", { isActive: true });
       if (!result.ok) return setError(result.message);
       setError(undefined);
+      toast.success(
+        service.isActive
+          ? `"${service.name}" desactivado: ya no aparece para reservar.`
+          : `"${service.name}" activado: ya se puede reservar.`,
+      );
       router.refresh();
     });
   }
@@ -54,7 +61,7 @@ export function ServicesManager({ businessId, services }: { businessId: number; 
                 <ServiceForm
                   businessId={businessId}
                   service={service}
-                  onSaved={refresh}
+                  onSaved={() => refresh("Servicio actualizado.")}
                   onCancel={() => setEditingId(undefined)}
                 />
               ) : (
@@ -88,7 +95,7 @@ export function ServicesManager({ businessId, services }: { businessId: number; 
           <CardTitle>Nuevo servicio</CardTitle>
         </CardHeader>
         <CardContent>
-          <ServiceForm businessId={businessId} onSaved={refresh} />
+          <ServiceForm businessId={businessId} onSaved={() => refresh("Servicio agregado.")} />
         </CardContent>
       </Card>
     </div>

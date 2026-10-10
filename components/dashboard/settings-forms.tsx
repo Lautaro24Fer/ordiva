@@ -2,8 +2,8 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -14,14 +14,6 @@ import { apiRequest } from "@/lib/api-client";
 import { TIMEZONE_OPTIONS } from "@/lib/timezones";
 import { bookingRuleSchema } from "@/schemas/businesses";
 import { optionalTextSchema, timezoneSchema } from "@/schemas/common";
-
-function SavedNotice({ show }: { show: boolean }) {
-  return show ? (
-    <span role="status" className="text-sm text-muted-foreground">
-      Cambios guardados.
-    </span>
-  ) : null;
-}
 
 // Mismo contrato que updateBusinessSchema, pero con todos los campos presentes.
 const businessDetailsSchema = z.object({
@@ -34,7 +26,6 @@ type Details = { name: string; description: string | null; timezone: string };
 
 export function BusinessDetailsForm({ businessId, details }: { businessId: number; details: Details }) {
   const router = useRouter();
-  const [saved, setSaved] = useState(false);
   const form = useForm<z.input<typeof businessDetailsSchema>, unknown, z.output<typeof businessDetailsSchema>>({
     resolver: zodResolver(businessDetailsSchema),
     defaultValues: { ...details, description: details.description ?? "" },
@@ -46,10 +37,9 @@ export function BusinessDetailsForm({ businessId, details }: { businessId: numbe
     : [{ value: details.timezone, label: details.timezone }, ...TIMEZONE_OPTIONS];
 
   async function onSubmit(values: z.output<typeof businessDetailsSchema>) {
-    setSaved(false);
     const result = await apiRequest(`/api/admin/businesses/${businessId}`, "PATCH", values);
     if (!result.ok) return form.setError("root", { message: result.message });
-    setSaved(true);
+    toast.success("Datos del negocio guardados.");
     router.refresh();
   }
 
@@ -82,12 +72,9 @@ export function BusinessDetailsForm({ businessId, details }: { businessId: numbe
         </Field>
       </FieldGroup>
       {errors.root && <FieldError>{errors.root.message}</FieldError>}
-      <div className="flex items-center gap-3">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Guardando…" : "Guardar datos"}
-        </Button>
-        <SavedNotice show={saved} />
-      </div>
+      <Button type="submit" disabled={isSubmitting} className="self-start">
+        {isSubmitting ? "Guardando…" : "Guardar datos"}
+      </Button>
     </form>
   );
 }
@@ -96,7 +83,6 @@ type Rule = z.input<typeof bookingRuleSchema>;
 
 export function BookingRuleForm({ businessId, rule }: { businessId: number; rule: Rule }) {
   const router = useRouter();
-  const [saved, setSaved] = useState(false);
   const form = useForm<Rule, unknown, z.output<typeof bookingRuleSchema>>({
     resolver: zodResolver(bookingRuleSchema),
     defaultValues: rule,
@@ -104,10 +90,9 @@ export function BookingRuleForm({ businessId, rule }: { businessId: number; rule
   const { errors, isSubmitting } = form.formState;
 
   async function onSubmit(values: z.output<typeof bookingRuleSchema>) {
-    setSaved(false);
     const result = await apiRequest(`/api/admin/businesses/${businessId}/booking-rule`, "PUT", values);
     if (!result.ok) return form.setError("root", { message: result.message });
-    setSaved(true);
+    toast.success("Reglas de reserva guardadas.");
     router.refresh();
   }
 
@@ -135,12 +120,9 @@ export function BookingRuleForm({ businessId, rule }: { businessId: number; rule
         {numberField("maxAdvanceDays", "Reservas hasta (días)", "Cuántos días hacia adelante se puede reservar, contando hoy.", { min: 1 })}
       </FieldGroup>
       {errors.root && <FieldError>{errors.root.message}</FieldError>}
-      <div className="flex items-center gap-3">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Guardando…" : "Guardar reglas"}
-        </Button>
-        <SavedNotice show={saved} />
-      </div>
+      <Button type="submit" disabled={isSubmitting} className="self-start">
+        {isSubmitting ? "Guardando…" : "Guardar reglas"}
+      </Button>
     </form>
   );
 }
