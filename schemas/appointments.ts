@@ -37,6 +37,13 @@ export const createPublicAppointmentSchema = z.object({
   website: z.string().max(500).optional(),
 });
 
+/** Campos que completa la persona en el formulario público (seguro en cliente). */
+export const bookingFormSchema = createPublicAppointmentSchema.pick({
+  customerName: true,
+  customerContact: true,
+  website: true,
+});
+
 export type CreatePublicAppointmentInput = z.output<typeof createPublicAppointmentSchema>;
 
 export const updateAppointmentStatusSchema = z.object({

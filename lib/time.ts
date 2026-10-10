@@ -1,13 +1,7 @@
 import { DateTime } from "luxon";
+import { HH_MM_REGEX, LOCAL_DATE_REGEX } from "@/lib/formats";
 
-/** "HH:mm" 24h con ancho fijo (00:00..23:59). */
-export const HH_MM_REGEX = /^([01]\d|2[0-3]):[0-5]\d$/;
-/** Fecha local "YYYY-MM-DD". */
-export const LOCAL_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
-
-export function isValidIanaZone(zone: string): boolean {
-  return DateTime.local().setZone(zone).isValid;
-}
+export { HH_MM_REGEX, LOCAL_DATE_REGEX, hhmmToMinutes, isValidIanaZone } from "@/lib/formats";
 
 /**
  * Convierte fecha local + "HH:mm" en la zona IANA dada a un instante UTC.
@@ -73,10 +67,4 @@ export function localDayRange(localDate: string, zone: string): { start: Date; e
 /** "HH:mm" local de un instante en la zona dada (etiqueta para UI). */
 export function toLocalTimeLabel(instant: Date, zone: string): string {
   return DateTime.fromJSDate(instant, { zone }).toFormat("HH:mm");
-}
-
-/** Minutos desde medianoche de un "HH:mm" válido. */
-export function hhmmToMinutes(time: string): number {
-  const [hour, minute] = time.split(":").map(Number);
-  return hour * 60 + minute;
 }

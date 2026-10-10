@@ -1,7 +1,7 @@
 # Plataforma de turnos multi-negocio (MVP)
 
 Aplicación de reservas para varios negocios (peluquerías, barberías, estética) con
-Next.js 16 (App Router), PostgreSQL y Prisma 7. Estado: Fase 2 (API y dominio) completa; falta interfaz y login.
+Next.js 16 (App Router), PostgreSQL y Prisma 7. Estado: Fases 1–3 completas (persistencia, API y reserva pública); falta login y panel del dueño.
 
 ## Requisitos
 
@@ -43,6 +43,21 @@ La migración `init` agrega SQL que Prisma no puede expresar:
   formato de slug y email normalizado.
 - El no solapamiento entre franjas de `BusinessHours` **no** está garantizado por la BD. Lo valida Zod,
   y el reemplazo se hace en una transacción con `SELECT … FOR UPDATE` sobre el negocio.
+
+## Páginas públicas
+
+| Ruta | Contenido |
+|---|---|
+| `/` | Directorio de negocios de demostración |
+| `/b/[slug]` | Datos del negocio y servicios activos |
+| `/b/[slug]/booking?serviceId=1` | Flujo de reserva: servicio → día → horario → datos → confirmación |
+
+Con `cacheComponents`, el esqueleto de carga se sirve como HTML estático y los datos llegan en streaming
+dentro de `<Suspense>` en cada request (sin caché: los cambios del dueño se ven al instante). Un slug inexistente
+muestra "Negocio no encontrado" con `noindex`, pero el status HTTP es 200 porque el streaming ya empezó.
+
+UI con shadcn/ui (estilo `base-nova`, Base UI) y React Hook Form. El formulario reutiliza los schemas Zod
+del servidor (`schemas/appointments.ts`), que solo dependen de `lib/formats.ts` y no arrastran código de servidor.
 
 ## API
 

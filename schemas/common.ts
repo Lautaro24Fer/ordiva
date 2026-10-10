@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { HH_MM_REGEX, isValidIanaZone } from "@/lib/time";
+import { HH_MM_REGEX, isValidIanaZone } from "@/lib/formats";
 
 /** Id entero positivo en JSON. */
 export const idSchema = z.number().int().positive().max(2_147_483_647);

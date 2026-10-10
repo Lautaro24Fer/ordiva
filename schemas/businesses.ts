@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { hhmmSchema, slugSchema, timezoneSchema } from "@/schemas/common";
-import { hhmmToMinutes } from "@/lib/time";
+import { hhmmToMinutes } from "@/lib/formats";
 
 export const createBusinessSchema = z.object({
   name: z.string().trim().min(2).max(150),
