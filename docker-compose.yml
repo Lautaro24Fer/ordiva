@@ -1,0 +1,24 @@
+# Solo PostgreSQL; Next.js corre en el host (npm run dev).
+# Puerto 5433 en el host para no chocar con un PostgreSQL local en 5432.
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: booking-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: booking
+      POSTGRES_PASSWORD: booking
+      POSTGRES_DB: booking
+    ports:
+      - "5433:5432"
+    volumes:
+      - booking-pgdata:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U booking -d booking"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  booking-pgdata:

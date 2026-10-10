@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           Int        @id @default(autoincrement())
+  name         String     @db.VarChar(150)
+  email        String     @unique @db.VarChar(255)
+  passwordHash String?    @db.VarChar(255)
+  businesses   Business[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Business {
+  id           Int             @id @default(autoincrement())
+  ownerId      Int
+  name         String          @db.VarChar(150)
+  slug         String          @unique @db.VarChar(150)
+  description  String?         @db.Text
+  timezone     String          @default("America/Argentina/Buenos_Aires") @db.VarChar(100)
+  owner        User            @relation(fields: [ownerId], references: [id])
+  services     Service[]
+  hours        BusinessHours[]
+  appointments Appointment[]
+  bookingRule  BookingRule?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@index([ownerId])
+}
+
+model Service {
+  id              Int           @id @default(autoincrement())
+  businessId      Int
+  name            String        @db.VarChar(150)
+  description     String?       @db.Text
+  durationMinutes Int
+  price           Decimal       @db.Decimal(12, 2)
+  isActive        Boolean       @default(true)
+  business        Business      @relation(fields: [businessId], references: [id])
+  appointments    Appointment[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@unique([id, businessId])
+  @@index([businessId, isActive])
+}
+
+model BusinessHours {
+  id         Int      @id @default(autoincrement())
+  businessId Int
+  dayOfWeek  Int
+  startTime  String   @db.VarChar(5)
+  endTime    String   @db.VarChar(5)
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, dayOfWeek, startTime])
+  @@index([businessId, dayOfWeek])
+}
+
+model Appointment {
+  id                     Int               @id @default(autoincrement())
+  businessId             Int
+  serviceId              Int
+  customerName           String            @db.VarChar(150)
+  customerContact        String            @db.VarChar(255)
+  startAt                DateTime          @db.Timestamptz(3)
+  endAt                  DateTime          @db.Timestamptz(3)
+  status                 AppointmentStatus @default(CONFIRMED)
+  serviceDurationMinutes Int
+  servicePrice           Decimal           @db.Decimal(12, 2)
+  business               Business          @relation(fields: [businessId], references: [id])
+  service                Service           @relation(fields: [serviceId, businessId], references: [id, businessId])
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
+
+  @@index([businessId, startAt])
+  @@index([businessId, status, startAt])
+  @@index([serviceId, businessId])
+}
+
+model BookingRule {
+  id                  Int      @id @default(autoincrement())
+  businessId          Int      @unique
+  slotIntervalMinutes Int      @default(15)
+  minNoticeMinutes    Int      @default(60)
+  maxAdvanceDays      Int      @default(30)
+  business            Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+enum AppointmentStatus {
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}

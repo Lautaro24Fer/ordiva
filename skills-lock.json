@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "skills": {
+    "deployments-cicd": {
+      "source": "vercel/vercel-plugin",
+      "sourceType": "github",
+      "skillPath": "skills/deployments-cicd/SKILL.md",
+      "computedHash": "ec01fd4cd1f92e93ab21d01c5b1219fb2990183787cdcb9fd94490778be3a104"
+    },
+    "env-vars": {
+      "source": "vercel/vercel-plugin",
+      "sourceType": "github",
+      "skillPath": "skills/env-vars/SKILL.md",
+      "computedHash": "36af6e78946761e17aead0e88717741ad4278ddd74dc560007c6631254cd6248"
+    },
+    "react-best-practices": {
+      "source": "vercel/vercel-plugin",
+      "sourceType": "github",
+      "skillPath": "skills/react-best-practices/SKILL.md",
+      "computedHash": "fc2d2d8ca9f458b823fc801f1b9d7ab89fb2a8093dcd65f2f6fc256dfeab15dc"
+    }
+  }
+}

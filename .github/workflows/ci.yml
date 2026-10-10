@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: booking
+          POSTGRES_PASSWORD: booking
+          POSTGRES_DB: booking_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U booking -d booking_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    # Credenciales efímeras del contenedor de CI; no son secretos reales.
+    env:
+      DATABASE_URL: postgresql://booking:booking@localhost:5432/booking_test?schema=public
+      DIRECT_URL: postgresql://booking:booking@localhost:5432/booking_test?schema=public
+      DATABASE_URL_TEST: postgresql://booking:booking@localhost:5432/booking_test?schema=public
+      AUTH_SECRET: ci-only-not-a-real-secret
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies (incluye prisma generate)
+        run: npm ci
+
+      - name: Validate Prisma schema
+        run: npx prisma validate
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm test
+
+      # El globalSetup recrea el schema vacío y ejecuta `prisma migrate deploy`.
+      - name: Integration tests (PostgreSQL real)
+        run: npm run test:integration
+
+      - name: Build
+        run: npm run build
