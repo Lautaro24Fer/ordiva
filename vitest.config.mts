@@ -1,7 +1,10 @@
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-  resolve: { tsconfigPaths: true },
+  resolve: {
+    tsconfigPaths: true,
+    alias: { "server-only": new URL("./tests/stubs/server-only.ts", import.meta.url).pathname },
+  },
   test: {
     projects: [
       {
@@ -20,6 +23,7 @@ export default defineConfig({
           environment: "node",
           include: ["tests/integration/**/*.test.ts"],
           globalSetup: ["tests/integration/global-setup.ts"],
+          setupFiles: ["tests/integration/setup-env.ts"],
           // Todos los archivos comparten la misma BD de test: ejecutar en serie.
           fileParallelism: false,
           testTimeout: 30_000,

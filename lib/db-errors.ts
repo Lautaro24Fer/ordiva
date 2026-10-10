@@ -32,3 +32,9 @@ export function getPgErrorCode(error: unknown): string | undefined {
 export function isExclusionViolation(error: unknown): boolean {
   return getPgErrorCode(error) === PG_EXCLUSION_VIOLATION;
 }
+
+export const PG_UNIQUE_VIOLATION = "23505";
+
+export function isUniqueViolation(error: unknown): boolean {
+  return getPgErrorCode(error) === PG_UNIQUE_VIOLATION;
+}

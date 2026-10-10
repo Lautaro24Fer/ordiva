@@ -59,3 +59,24 @@ export function toLocalDate(instant: Date, zone: string): string {
 export function addLocalDays(localDate: string, days: number): string {
   return DateTime.fromISO(localDate, { zone: "UTC" }).plus({ days }).toISODate()!;
 }
+
+/** Instantes [inicio, fin) del día local completo en la zona dada. */
+export function localDayRange(localDate: string, zone: string): { start: Date; end: Date } | null {
+  if (!LOCAL_DATE_REGEX.test(localDate)) return null;
+  const day = DateTime.fromISO(localDate, { zone });
+  if (!day.isValid) return null;
+  // startOf("day") resuelve zonas donde la medianoche no existe por DST.
+  const start = day.startOf("day");
+  return { start: start.toJSDate(), end: start.plus({ days: 1 }).toJSDate() };
+}
+
+/** "HH:mm" local de un instante en la zona dada (etiqueta para UI). */
+export function toLocalTimeLabel(instant: Date, zone: string): string {
+  return DateTime.fromJSDate(instant, { zone }).toFormat("HH:mm");
+}
+
+/** Minutos desde medianoche de un "HH:mm" válido. */
+export function hhmmToMinutes(time: string): number {
+  const [hour, minute] = time.split(":").map(Number);
+  return hour * 60 + minute;
+}

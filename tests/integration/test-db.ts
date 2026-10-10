@@ -1,6 +1,6 @@
 import "dotenv/config";
 import type { PrismaClient } from "@/generated/prisma/client";
-import { createPrismaClient } from "@/lib/prisma";
+import { createPrismaClient } from "@/lib/prisma-client";
 
 /** URL de la BD de test; se niega a operar sobre algo que no parezca de test. */
 export function getTestDatabaseUrl(): string {

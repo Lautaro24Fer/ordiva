@@ -6,7 +6,7 @@
 import "dotenv/config";
 import { DateTime } from "luxon";
 import type { PrismaClient } from "@/generated/prisma/client";
-import { createPrismaClient } from "@/lib/prisma";
+import { createPrismaClient } from "@/lib/prisma-client";
 import { hashPassword } from "@/lib/password";
 import { isExclusionViolation } from "@/lib/db-errors";
 import { localDateTimeToUtc } from "@/lib/time";
