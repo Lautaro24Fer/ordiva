@@ -159,6 +159,22 @@
   html {
     @apply font-sans;
   }
+  /*
+   * Foco visible por defecto (links de texto, etc.). Los componentes con su
+   * propio anillo usan `outline-none`, que como utilidad gana sobre esta base.
+   */
+  :focus-visible {
+    @apply rounded-sm outline-2 outline-offset-2 outline-ring;
+  }
+  a {
+    @apply transition-colors;
+  }
+  /* Todo lo clickeable lo indica con el cursor; lo deshabilitado no. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  summary {
+    @apply cursor-pointer;
+  }
   /* Scroll suave a anclas solo si la persona no pidió reducir el movimiento. */
   @media (prefers-reduced-motion: no-preference) {
     html {

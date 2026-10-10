@@ -52,7 +52,7 @@ async function BusinessList() {
         <li key={business.id}>
           <Link
             href={`/dashboard/${business.id}`}
-            className="flex items-center justify-between gap-4 rounded-xl border bg-card p-4 transition-colors outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="flex items-center justify-between gap-4 rounded-xl border bg-card p-4 transition-colors outline-none hover:border-primary/40 hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             <span className="flex flex-col gap-0.5">
               <span className="font-medium">{business.name}</span>

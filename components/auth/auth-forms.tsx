@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { loginAction, registerAction, type AuthFormState } from "@/app/(auth)/actions";
+import { PasswordInput } from "@/components/auth/password-input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,11 +32,11 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
           <FieldGroup>
             <Field>
               <FieldLabel htmlFor="email">Email</FieldLabel>
-              <Input id="email" name="email" type="email" autoComplete="email" required defaultValue={state.values?.email} />
+              <Input id="email" name="email" type="email" autoComplete="email" required defaultValue={state.values?.email} className="h-9" />
             </Field>
             <Field>
               <FieldLabel htmlFor="password">Contraseña</FieldLabel>
-              <Input id="password" name="password" type="password" autoComplete="current-password" required />
+              <PasswordInput id="password" name="password" autoComplete="current-password" required />
             </Field>
           </FieldGroup>
           {callbackUrl && <input type="hidden" name="callbackUrl" value={callbackUrl} />}
@@ -76,20 +77,19 @@ export function RegisterForm() {
           <FieldGroup>
             <Field data-invalid={Boolean(errors.name)}>
               <FieldLabel htmlFor="name">Tu nombre</FieldLabel>
-              <Input id="name" name="name" autoComplete="name" required defaultValue={state.values?.name} aria-invalid={Boolean(errors.name)} />
+              <Input id="name" name="name" autoComplete="name" required defaultValue={state.values?.name} aria-invalid={Boolean(errors.name)} className="h-9" />
               <FieldError errors={toErrors(errors.name)} />
             </Field>
             <Field data-invalid={Boolean(errors.email)}>
               <FieldLabel htmlFor="email">Email</FieldLabel>
-              <Input id="email" name="email" type="email" autoComplete="email" required defaultValue={state.values?.email} aria-invalid={Boolean(errors.email)} />
+              <Input id="email" name="email" type="email" autoComplete="email" required defaultValue={state.values?.email} aria-invalid={Boolean(errors.email)} className="h-9" />
               <FieldError errors={toErrors(errors.email)} />
             </Field>
             <Field data-invalid={Boolean(errors.password)}>
               <FieldLabel htmlFor="password">Contraseña</FieldLabel>
-              <Input
+              <PasswordInput
                 id="password"
                 name="password"
-                type="password"
                 autoComplete="new-password"
                 required
                 minLength={PASSWORD_MIN_LENGTH}
