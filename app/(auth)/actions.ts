@@ -67,5 +67,5 @@ export async function registerAction(_prev: AuthFormState, formData: FormData): 
 }
 
 export async function logoutAction(): Promise<void> {
-  await signOut({ redirectTo: "/login" });
+  await signOut({ redirectTo: "/" });
 }
