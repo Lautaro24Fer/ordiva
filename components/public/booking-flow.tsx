@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRef, useState } from "react";
-import { CalendarCheck, Clock, TriangleAlert } from "lucide-react";
+import { CalendarCheck, Check, Clock, TriangleAlert } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +31,19 @@ export type BookingFlowProps = {
   days: BookingDay[];
   initialServiceId?: number;
 };
+
+type StepStatus = "complete" | "current" | "upcoming";
+
+/**
+ * Ref callback para lo que aparece tras una acción (paso 4, confirmación):
+ * lleva el foco y lo hace visible. Es estable, así que corre solo al montar.
+ * El scroll es suave únicamente si no se pidió reducir el movimiento (ver globals.css).
+ */
+function revealOnMount(element: HTMLElement | null) {
+  if (!element) return;
+  element.focus({ preventScroll: true });
+  element.scrollIntoView({ block: "start" });
+}
 
 /** "America/Argentina/Buenos_Aires" → "Buenos Aires". */
 function zoneCity(timezone: string): string {
@@ -95,13 +108,19 @@ export function BookingFlow({ slug, businessName, timezone, services, days, init
     if (serviceId && date) void loadSlots(serviceId, date);
   }
 
+  // El paso actual es el primero sin completar.
+  const completed = [Boolean(service), Boolean(day), Boolean(selectedSlot)];
+  const currentStep = completed.indexOf(false) + 1 || 4;
+  const statusOf = (step: number): StepStatus =>
+    step < currentStep ? "complete" : step === currentStep ? "current" : "upcoming";
+
   if (confirmation) {
     return <BookingConfirmation confirmation={confirmation} slug={slug} businessName={businessName} onRestart={restart} />;
   }
 
   return (
     <div className="flex flex-col gap-8">
-      <Step number={1} title="Elegí el servicio">
+      <Step number={1} status={statusOf(1)} title="Elegí el servicio">
         <div className="grid gap-2 sm:grid-cols-2" role="group" aria-label="Servicios">
           {services.map((s) => (
             <button
@@ -123,33 +142,35 @@ export function BookingFlow({ slug, businessName, timezone, services, days, init
         </div>
       </Step>
 
-      <Step number={2} title="Elegí el día">
-        <div
-          className="-mx-4 flex snap-x gap-2 overflow-x-auto px-4 pb-2"
-          role="group"
-          aria-label="Días disponibles"
-        >
-          {days.map((d) => (
-            <button
-              key={d.date}
-              type="button"
-              disabled={!d.isOpen}
-              aria-pressed={d.date === date}
-              aria-label={`${d.weekday} ${d.label}${d.isOpen ? "" : ", cerrado"}`}
-              onClick={() => selectDate(d.date)}
-              className={cn(
-                "flex w-16 shrink-0 snap-start flex-col items-center gap-0.5 rounded-xl border bg-card py-2 text-sm transition-colors outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-40",
-                d.date === date && "border-primary bg-primary text-primary-foreground hover:bg-primary/90",
-              )}
-            >
-              <span className="text-xs uppercase opacity-80">{d.weekday}</span>
-              <span className="font-medium">{d.label}</span>
-            </button>
-          ))}
+      <Step number={2} status={statusOf(2)} title="Elegí el día">
+        {/* El degradado del borde indica que la fila sigue y se puede deslizar. */}
+        <div className="relative -mx-4">
+          <div className="flex snap-x scroll-px-4 gap-2 overflow-x-auto px-4 pb-2" role="group" aria-label="Días disponibles">
+            {days.map((d) => (
+              <button
+                key={d.date}
+                type="button"
+                disabled={!d.isOpen}
+                aria-pressed={d.date === date}
+                aria-label={`${d.weekday} ${d.label}${d.isOpen ? "" : ", cerrado"}`}
+                onClick={() => selectDate(d.date)}
+                className={cn(
+                  "flex h-18 w-16 shrink-0 snap-start flex-col items-center justify-center gap-0.5 rounded-xl border bg-card text-sm transition-colors outline-none hover:border-primary/40 hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring/50",
+                  "disabled:pointer-events-none disabled:border-dashed disabled:bg-muted disabled:text-muted-foreground",
+                  d.date === date && "border-primary bg-primary text-primary-foreground hover:bg-primary/90",
+                )}
+              >
+                <span className="text-xs uppercase opacity-80">{d.weekday}</span>
+                <span className="font-medium">{d.label}</span>
+                {!d.isOpen && <span className="text-xs">Cerrado</span>}
+              </button>
+            ))}
+          </div>
+          <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-linear-to-l from-background" />
         </div>
       </Step>
 
-      <Step number={3} title="Elegí el horario" description={`Horarios en hora de ${zoneCity(timezone)}.`}>
+      <Step number={3} status={statusOf(3)} title="Elegí el horario" description={`Horarios en hora de ${zoneCity(timezone)}.`}>
         {notice && (
           <Alert>
             <TriangleAlert aria-hidden />
@@ -170,7 +191,7 @@ export function BookingFlow({ slug, businessName, timezone, services, days, init
       </Step>
 
       {service && day && selectedSlot && (
-        <Step number={4} title="Tus datos">
+        <Step number={4} status={statusOf(4)} title="Tus datos" headingRef={revealOnMount}>
           <p className="text-sm text-muted-foreground">
             {service.name} · {day.weekday} {day.label} a las {selectedSlot.label} · {formatPrice(service.price)}
           </p>
@@ -190,26 +211,49 @@ export function BookingFlow({ slug, businessName, timezone, services, days, init
   );
 }
 
+const STEP_STATUS_LABEL: Record<StepStatus, string> = {
+  complete: "completado",
+  current: "paso actual",
+  upcoming: "pendiente",
+};
+
 function Step({
   number,
+  status,
   title,
   description,
+  headingRef,
   children,
 }: {
   number: number;
+  status: StepStatus;
   title: string;
   description?: string;
+  headingRef?: React.Ref<HTMLHeadingElement>;
   children: React.ReactNode;
 }) {
   const id = `step-${number}`;
   return (
-    <section aria-labelledby={id} className="flex flex-col gap-3">
+    <section aria-labelledby={id} aria-current={status === "current" ? "step" : undefined} className="flex flex-col gap-3">
       <div className="flex flex-col gap-0.5">
-        <h2 id={id} className="flex items-center gap-2 text-base font-medium">
-          <span className="flex size-6 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-            {number}
+        <h2
+          id={id}
+          ref={headingRef}
+          tabIndex={headingRef ? -1 : undefined}
+          className="flex scroll-mt-6 items-center gap-2 text-base font-medium outline-none"
+        >
+          <span
+            aria-hidden
+            className={cn(
+              "flex size-6 items-center justify-center rounded-full text-xs transition-colors",
+              status === "upcoming" ? "border bg-card text-muted-foreground" : "bg-primary text-primary-foreground",
+              status === "current" && "ring-3 ring-primary/20",
+            )}
+          >
+            {status === "complete" ? <Check className="size-3.5" /> : number}
           </span>
           {title}
+          <span className="sr-only">({STEP_STATUS_LABEL[status]})</span>
         </h2>
         {description && <p className="pl-8 text-sm text-muted-foreground">{description}</p>}
       </div>
@@ -297,8 +341,14 @@ function BookingConfirmation({
   return (
     <Card>
       <CardHeader>
-        <CalendarCheck aria-hidden className="mb-2 size-8 text-primary" />
-        <CardTitle className="text-xl">¡Turno confirmado!</CardTitle>
+        <span className="mb-2 flex size-12 items-center justify-center rounded-full bg-accent text-accent-foreground">
+          <CalendarCheck aria-hidden className="size-6" />
+        </span>
+        <CardTitle className="text-xl">
+          <h2 ref={revealOnMount} tabIndex={-1} className="scroll-mt-6 outline-none">
+            ¡Turno confirmado!
+          </h2>
+        </CardTitle>
         <CardDescription>Te esperamos en {businessName}.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
