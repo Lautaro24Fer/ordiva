@@ -57,8 +57,9 @@ export function parseSearchParams<S extends ZodType>(request: Request, schema: S
 }
 
 /** IP del cliente según headers del proxy (Vercel los sobrescribe; en otros hosts pueden falsificarse). */
-export function getClientIp(request: Request): string {
-  const forwarded = request.headers.get("x-forwarded-for");
+export function getClientIp(source: Request | Headers): string {
+  const headers = source instanceof Headers ? source : source.headers;
+  const forwarded = headers.get("x-forwarded-for");
   if (forwarded) return forwarded.split(",")[0].trim();
-  return request.headers.get("x-real-ip")?.trim() || "unknown";
+  return headers.get("x-real-ip")?.trim() || "unknown";
 }

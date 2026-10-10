@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { durationMinutesSchema, moneySchema } from "@/schemas/common";
+import { durationMinutesSchema, moneySchema, optionalTextSchema } from "@/schemas/common";
 
 export const createServiceSchema = z.object({
   name: z.string().trim().min(1).max(150),
-  description: z.string().trim().max(2000).nullish(),
+  description: optionalTextSchema(2000),
   durationMinutes: durationMinutesSchema,
   price: moneySchema,
 });

@@ -1,3 +1,4 @@
+import "@/schemas/zod-config";
 import { z } from "zod";
 import { HH_MM_REGEX, isValidIanaZone } from "@/lib/formats";
 
@@ -35,3 +36,12 @@ export const moneySchema = z
   .regex(/^\d{1,10}(\.\d{1,2})?$/, "Importe inválido: usar formato 15000 o 15000.50");
 
 export const durationMinutesSchema = z.number().int().min(5).max(24 * 60);
+
+/** Texto opcional: vacío o solo espacios se guarda como null. */
+export const optionalTextSchema = (max: number) =>
+  z
+    .string()
+    .trim()
+    .max(max)
+    .nullish()
+    .transform((value) => value || null);

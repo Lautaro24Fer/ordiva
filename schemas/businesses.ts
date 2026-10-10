@@ -1,11 +1,11 @@
 import { z } from "zod";
-import { hhmmSchema, slugSchema, timezoneSchema } from "@/schemas/common";
+import { hhmmSchema, optionalTextSchema, slugSchema, timezoneSchema } from "@/schemas/common";
 import { hhmmToMinutes } from "@/lib/formats";
 
 export const createBusinessSchema = z.object({
   name: z.string().trim().min(2).max(150),
   slug: slugSchema,
-  description: z.string().trim().max(2000).nullish(),
+  description: optionalTextSchema(2000),
   timezone: timezoneSchema.default("America/Argentina/Buenos_Aires"),
 });
 

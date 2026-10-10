@@ -1,7 +1,7 @@
 # Plataforma de turnos multi-negocio (MVP)
 
 Aplicación de reservas para varios negocios (peluquerías, barberías, estética) con
-Next.js 16 (App Router), PostgreSQL y Prisma 7. Estado: Fases 1–3 completas (persistencia, API y reserva pública); falta login y panel del dueño.
+Next.js 16 (App Router), PostgreSQL y Prisma 7. Estado: MVP funcional en local (persistencia, API, reserva pública, login y panel del dueño). Falta el despliegue (Neon + Vercel).
 
 ## Requisitos
 
@@ -11,7 +11,7 @@ Next.js 16 (App Router), PostgreSQL y Prisma 7. Estado: Fases 1–3 completas (p
 ## Puesta en marcha local
 
 ```bash
-cp .env.example .env
+cp .env.example .env   # y reemplazar AUTH_SECRET: openssl rand -base64 33
 npm install            # incluye `prisma generate`
 npm run db:up          # PostgreSQL 17 en localhost:5433 (bases booking y booking_test)
 npm run db:migrate     # aplica las migraciones versionadas
@@ -44,6 +44,34 @@ La migración `init` agrega SQL que Prisma no puede expresar:
 - El no solapamiento entre franjas de `BusinessHours` **no** está garantizado por la BD. Lo valida Zod,
   y el reemplazo se hace en una transacción con `SELECT … FOR UPDATE` sobre el negocio.
 
+## Login y panel del dueño
+
+| Ruta | Contenido |
+|---|---|
+| `/register`, `/login` | Alta y acceso de dueños (email + contraseña) |
+| `/dashboard` | Negocios del usuario; alta en `/dashboard/new` |
+| `/dashboard/[businessId]` | Turnos del día (navegación por fecha, completar/cancelar) |
+| `/dashboard/[businessId]/services` | Alta, edición y activación de servicios |
+| `/dashboard/[businessId]/hours` | Franjas semanales (varias por día) |
+| `/dashboard/[businessId]/settings` | Datos del negocio y reglas de reserva |
+
+**Cómo funciona la autenticación**
+
+- Auth.js v5 (`next-auth@5.0.0-beta.32`, todavía en beta) con el provider Credentials y sesión **JWT**
+  en una cookie httpOnly, `SameSite=Lax` y `Secure` en HTTPS, firmada con `AUTH_SECRET`. Dura 8 horas.
+  No usa tablas de sesión ni el adapter de Prisma.
+- Las contraseñas se guardan con Argon2id. El login responde igual si el email no existe o si la contraseña es
+  incorrecta, y en ambos casos verifica un hash señuelo para que el tiempo de respuesta no revele qué cuentas existen.
+- `proxy.ts` solo redirige a `/login` si no hay sesión. La autorización real está en cada página
+  (`lib/dashboard.ts`) y en cada endpoint (`lib/session.ts` + `requireOwnedBusiness`).
+- Un negocio ajeno responde 404.
+- Las lecturas del panel son Server Components que llaman a `modules/*`. Las escrituras usan la API REST de
+  administración, ya cubierta por tests, con la cookie de sesión. Las mutaciones (POST/PUT/PATCH/DELETE)
+  quedan protegidas de CSRF por la cookie `SameSite=Lax` y el `Content-Type: application/json`.
+- Login y registro son Server Actions. Next valida su origen, y `callbackUrl` solo acepta rutas internas
+  (`lib/safe-redirect.ts`).
+- El registro es simple y **sin verificación de email**: sirve para la demo, no para producción.
+
 ## Páginas públicas
 
 | Ruta | Contenido |
@@ -73,7 +101,7 @@ Los errores usan el formato `{ "error": { "code", "message", "details?" } }`.
 | GET | `/api/businesses/[slug]/availability?serviceId=1&date=YYYY-MM-DD` | Slots `{ startAt, endAt, label }`; fecha local del negocio |
 | POST | `/api/businesses/[slug]/appointments` | `{ serviceId, startAt, customerName, customerContact }` → 201; 409 si el horario se ocupó |
 
-### Administración (requiere sesión; hasta la Fase 4 responde siempre 401)
+### Administración (requiere sesión; sin ella responde 401)
 
 Rutas anidadas por negocio. Cada operación verifica que el negocio pertenezca al usuario
 de la sesión; si no, responde 404 igual que para un recurso inexistente.
@@ -112,7 +140,8 @@ de la sesión; si no, responde 404 igual que para un recurso inexistente.
 
 ## Limitaciones conocidas
 
-- **Rate limiting en memoria** (`lib/rate-limit.ts`): no es global en serverless. Antes de operar con usuarios
-  reales hay que reemplazarlo por un store compartido.
+- **Rate limiting en memoria** (`lib/rate-limit.ts`) para reservas, login y registro: no es global en serverless.
+  Antes de operar con usuarios reales hay que reemplazarlo por un store compartido.
+- Registro sin verificación de email ni recuperación de contraseña.
 - Antispam básico (campo honeypot `website`); no hay CAPTCHA.
 - Sin feriados ni cierres especiales, sin moneda configurable (se asume ARS) y sin horarios nocturnos.

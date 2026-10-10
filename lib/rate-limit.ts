@@ -46,3 +46,9 @@ export class InMemoryRateLimiter implements RateLimiter {
 
 /** Reservas públicas: 10 intentos cada 10 minutos por IP y negocio. */
 export const publicBookingRateLimiter = new InMemoryRateLimiter(10, 10 * 60_000);
+
+/** Login: 10 intentos cada 15 minutos por IP y email. */
+export const loginRateLimiter = new InMemoryRateLimiter(10, 15 * 60_000);
+
+/** Registro: 5 cuentas por hora por IP. */
+export const registerRateLimiter = new InMemoryRateLimiter(5, 60 * 60_000);

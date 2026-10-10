@@ -68,3 +68,8 @@ export function localDayRange(localDate: string, zone: string): { start: Date; e
 export function toLocalTimeLabel(instant: Date, zone: string): string {
   return DateTime.fromJSDate(instant, { zone }).toFormat("HH:mm");
 }
+
+/** "2026-10-13" → "martes 13 de octubre" (en español). */
+export function formatLocalDateLong(localDate: string): string {
+  return DateTime.fromISO(localDate).setLocale("es-AR").toFormat("cccc d 'de' LLLL");
+}

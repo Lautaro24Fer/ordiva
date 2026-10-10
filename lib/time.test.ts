@@ -55,3 +55,10 @@ describe("helpers de fecha local", () => {
     expect(isValidIanaZone("Mars/Base")).toBe(false);
   });
 });
+
+describe("formatLocalDateLong", () => {
+  it("formatea en español", async () => {
+    const { formatLocalDateLong } = await import("./time");
+    expect(formatLocalDateLong("2026-10-13")).toBe("martes 13 de octubre");
+  });
+});
