@@ -10,7 +10,7 @@ export function BusinessHeader({ business }: { business: { id: number; name: str
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div className="flex flex-col gap-1">
-          <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
+          <Link href="/dashboard" className="self-start text-sm text-muted-foreground hover:text-foreground max-sm:-my-3 max-sm:py-3">
             Tus negocios
           </Link>
           <h1 className="text-2xl font-semibold tracking-tight">{business.name}</h1>

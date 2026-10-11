@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CalendarCheck, Check, Clock, TriangleAlert } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -60,6 +60,16 @@ export function BookingFlow({ slug, businessName, timezone, services, days, init
   const [confirmation, setConfirmation] = useState<Confirmation>();
   // Ignora respuestas viejas si la persona cambia de día/servicio rápido.
   const latestRequest = useRef(0);
+  // Tras elegir servicio o día, al llegar los horarios se lleva la primera fila
+  // a la vista (en móvil, por encima de la barra de resumen fija).
+  const revealSlots = useRef(false);
+  const slotsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (slotsState.status !== "ready" || !revealSlots.current) return;
+    revealSlots.current = false;
+    slotsRef.current?.querySelector("button")?.scrollIntoView({ block: "nearest" });
+  }, [slotsState]);
 
   const service = services.find((s) => s.id === serviceId);
   const day = days.find((d) => d.date === date);
@@ -79,12 +89,14 @@ export function BookingFlow({ slug, businessName, timezone, services, days, init
   function selectService(id: number) {
     setServiceId(id);
     setNotice(undefined);
+    revealSlots.current = true;
     if (date) void loadSlots(id, date);
   }
 
   function selectDate(nextDate: string) {
     setDate(nextDate);
     setNotice(undefined);
+    revealSlots.current = true;
     if (serviceId) void loadSlots(serviceId, nextDate);
   }
 
@@ -172,16 +184,18 @@ export function BookingFlow({ slug, businessName, timezone, services, days, init
               <AlertDescription>{notice}</AlertDescription>
             </Alert>
           )}
-          <SlotPicker
-            state={slotsState}
-            canLoad={Boolean(service && day)}
-            selected={selectedSlot}
-            onSelect={(slot) => {
-              setSelectedSlot(slot);
-              setNotice(undefined);
-            }}
-            onRetry={() => serviceId && date && loadSlots(serviceId, date)}
-          />
+          <div ref={slotsRef}>
+            <SlotPicker
+              state={slotsState}
+              canLoad={Boolean(service && day)}
+              selected={selectedSlot}
+              onSelect={(slot) => {
+                setSelectedSlot(slot);
+                setNotice(undefined);
+              }}
+              onRetry={() => serviceId && date && loadSlots(serviceId, date)}
+            />
+          </div>
         </Step>
 
         {service && <MobileSummary service={service} day={day} slot={selectedSlot} />}
@@ -340,7 +354,7 @@ function SlotPicker({
           type="button"
           variant={selected?.startAt === slot.startAt ? "default" : "outline"}
           aria-pressed={selected?.startAt === slot.startAt}
-          className="tabular-nums"
+          className="tabular-nums max-sm:h-11 max-sm:scroll-mb-28"
           onClick={() => onSelect(slot)}
         >
           {slot.label}

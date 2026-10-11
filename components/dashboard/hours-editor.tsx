@@ -105,6 +105,7 @@ export function HoursEditor({ businessId, hours }: { businessId: number; hours: 
                       type="button"
                       variant="ghost"
                       size="icon"
+                      className="max-sm:size-11"
                       aria-label={`Quitar franja del ${day.label.toLowerCase()}`}
                       onClick={() => remove(row.key)}
                     >

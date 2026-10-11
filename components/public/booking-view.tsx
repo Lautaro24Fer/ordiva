@@ -16,7 +16,7 @@ export function BookingView({ data, requestedServiceId }: { data: BookingPageDat
       <header className="flex flex-col gap-1">
         <Link
           href={`/b/${data.business.slug}`}
-          className="inline-flex items-center gap-1 self-start text-sm text-muted-foreground hover:text-foreground"
+          className="inline-flex items-center gap-1 self-start text-sm text-muted-foreground hover:text-foreground max-sm:-my-3 max-sm:py-3"
         >
           <ChevronLeft aria-hidden className="size-4" />
           {data.business.name}

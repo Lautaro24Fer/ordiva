@@ -41,24 +41,24 @@ export function AppointmentsDay({ business, date, today, appointments }: Props) 
           <Link
             href={`${base}?date=${addLocalDays(date, -1)}`}
             aria-label="Día anterior"
-            className={buttonVariants({ variant: "outline", size: "icon-lg" })}
+            className={cn(buttonVariants({ variant: "outline", size: "icon-lg" }), "max-sm:size-11")}
           >
             <ChevronLeft aria-hidden />
           </Link>
           {/* Ya en hoy: botón deshabilitado (no enfocable) en lugar de un link "apagado". */}
           {date === today ? (
-            <Button variant="outline" size="lg" disabled>
+            <Button variant="outline" size="lg" disabled className="max-sm:h-11">
               Hoy
             </Button>
           ) : (
-            <Link href={base} className={buttonVariants({ variant: "outline", size: "lg" })}>
+            <Link href={base} className={cn(buttonVariants({ variant: "outline", size: "lg" }), "max-sm:h-11")}>
               Hoy
             </Link>
           )}
           <Link
             href={`${base}?date=${addLocalDays(date, 1)}`}
             aria-label="Día siguiente"
-            className={buttonVariants({ variant: "outline", size: "icon-lg" })}
+            className={cn(buttonVariants({ variant: "outline", size: "icon-lg" }), "max-sm:size-11")}
           >
             <ChevronRight aria-hidden />
           </Link>
@@ -67,8 +67,8 @@ export function AppointmentsDay({ business, date, today, appointments }: Props) 
             <label htmlFor="date" className="sr-only">
               Ir a la fecha
             </label>
-            <Input id="date" name="date" type="date" defaultValue={date} className="h-9 min-w-0 flex-1 sm:w-auto sm:flex-none" />
-            <Button type="submit" variant="outline" size="lg">
+            <Input id="date" name="date" type="date" defaultValue={date} className="h-9 min-w-0 flex-1 max-sm:h-11 sm:w-auto sm:flex-none" />
+            <Button type="submit" variant="outline" size="lg" className="max-sm:h-11 max-sm:px-4">
               Ir
             </Button>
           </form>

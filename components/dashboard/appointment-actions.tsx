@@ -48,11 +48,11 @@ export function AppointmentActions({ businessId, appointmentId, summary }: Props
   return (
     <div className="flex flex-col items-end gap-1">
       <div className="flex gap-1">
-        <Button variant="outline" disabled={pending} onClick={() => update("COMPLETED")}>
+        <Button variant="outline" disabled={pending} className="max-sm:h-11" onClick={() => update("COMPLETED")}>
           Completar
         </Button>
         <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-          <AlertDialogTrigger render={<Button variant="destructive" disabled={pending} />}>Cancelar</AlertDialogTrigger>
+          <AlertDialogTrigger render={<Button variant="destructive" disabled={pending} className="max-sm:h-11" />}>Cancelar</AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>¿Cancelar este turno?</AlertDialogTitle>
