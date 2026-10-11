@@ -11,7 +11,7 @@ export function Brand() {
       <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
         <CalendarCheck aria-hidden className="size-4.5" />
       </span>
-      Turnos
+      Ordiva
     </Link>
   );
 }

@@ -1,4 +1,4 @@
-# Design System: Turnos (MASTER)
+# Design System: Ordiva (MASTER)
 
 Fuente de verdad visual de la plataforma. Las páginas pueden tener overrides en `pages/<pagina>.md`.
 Base: recomendación de `ui-ux-pro-max` para "Booking & Appointment App" (Soft UI Evolution + Flat),

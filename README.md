@@ -1,4 +1,4 @@
-# Plataforma de turnos multi-negocio (MVP)
+# Ordiva — plataforma de turnos multi-negocio (MVP)
 
 Aplicación de reservas para varios negocios (peluquerías, barberías, estética) con
 Next.js 16 (App Router), PostgreSQL y Prisma 7. Estado: MVP funcional en local (persistencia, API, reserva pública, login y panel del dueño). Falta el despliegue (Neon + Vercel).

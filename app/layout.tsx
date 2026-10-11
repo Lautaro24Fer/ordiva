@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: { default: "Turnos", template: "%s · Turnos" },
+  title: { default: "Ordiva", template: "%s · Ordiva" },
   description: "Reservá turnos online en peluquerías, barberías y centros de estética.",
 };
 

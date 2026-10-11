@@ -9,7 +9,7 @@ export function SiteFooter() {
   return (
     <footer className="border-t">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-2 px-4 py-6 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-        <p>Turnos · Demo con datos ficticios</p>
+        <p>Ordiva · Demo con datos ficticios</p>
         <Suspense fallback={<Skeleton className="h-5 w-56" />}>
           <OwnerLink />
         </Suspense>
