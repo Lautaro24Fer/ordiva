@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { loadOwnedBusiness } from "@/lib/dashboard";
 import { formatDuration, formatPrice } from "@/lib/format-display";
+import { getServerRepos } from "@/lib/repositories/server";
 import { addLocalDays, formatLocalDateLong, toLocalDate, toLocalTimeLabel } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { listAppointments } from "@/modules/appointments/appointments.service";
@@ -40,7 +41,7 @@ async function AppointmentsContent({ params, searchParams }: Pick<Props, "params
   const today = toLocalDate(new Date(), business.timezone);
   const date = requested.success ? requested.data : today;
 
-  const appointments = await listAppointments(userId, business.id, date);
+  const appointments = await listAppointments(getServerRepos(), userId, business.id, date);
   const confirmed = appointments.filter((a) => a.status === "CONFIRMED").length;
   const base = `/dashboard/${business.id}`;
 

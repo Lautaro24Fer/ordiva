@@ -7,12 +7,13 @@ import { ChevronLeft } from "lucide-react";
 import { BookingFlow } from "@/components/public/booking-flow";
 import { PageShell } from "@/components/public/page-shell";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getServerRepos } from "@/lib/repositories/server";
 import { getBusinessPage, getBookingPage } from "@/modules/businesses/public-pages.service";
 
 type Props = PageProps<"/b/[slug]/booking">;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const data = await getBusinessPage((await params).slug);
+  const data = await getBusinessPage(getServerRepos(), (await params).slug);
   return { title: data ? `Reservar en ${data.business.name}` : "Negocio no encontrado" };
 }
 
@@ -31,7 +32,7 @@ async function BookingContent({ params, searchParams }: Pick<Props, "params" | "
   const { serviceId } = await searchParams;
   // La lista de días depende de la fecha actual: se calcula en cada request.
   await connection();
-  const data = await getBookingPage(slug, new Date());
+  const data = await getBookingPage(getServerRepos(), slug, new Date());
   if (!data) notFound();
 
   const requestedId = Number(serviceId);

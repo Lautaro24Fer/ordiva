@@ -4,6 +4,7 @@ import { BookingRuleForm, BusinessDetailsForm } from "@/components/dashboard/set
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { loadOwnedBusiness } from "@/lib/dashboard";
+import { getServerRepos } from "@/lib/repositories/server";
 import { getBookingRule } from "@/modules/businesses/businesses.service";
 
 export const metadata: Metadata = { title: "Configuración" };
@@ -20,7 +21,7 @@ export default function SettingsPage({ params }: Props) {
 
 async function SettingsContent({ params }: Pick<Props, "params">) {
   const { userId, business } = await loadOwnedBusiness((await params).businessId);
-  const rule = await getBookingRule(userId, business.id);
+  const rule = await getBookingRule(getServerRepos(), userId, business.id);
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">

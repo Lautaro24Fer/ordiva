@@ -2,6 +2,7 @@ import "server-only";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 import { AppError } from "@/lib/errors";
+import { getServerRepos } from "@/lib/repositories/server";
 import { requirePageUserId } from "@/lib/session";
 import { requireOwnedBusiness } from "@/modules/businesses/businesses.service";
 import { idParamSchema } from "@/schemas/common";
@@ -17,7 +18,7 @@ export const loadOwnedBusiness = cache(async (businessIdParam: string) => {
   if (!parsed.success) notFound();
 
   try {
-    const business = await requireOwnedBusiness(userId, parsed.data);
+    const business = await requireOwnedBusiness(getServerRepos(), userId, parsed.data);
     return { userId, business };
   } catch (error) {
     if (error instanceof AppError && error.status === 404) notFound();

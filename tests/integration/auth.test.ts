@@ -1,5 +1,6 @@
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { verifyPassword } from "@/lib/password";
+import { createPrismaRepositories } from "@/lib/repositories/prisma";
 import { registerUser, verifyCredentials } from "@/modules/auth/auth.service";
 import { loginSchema, registerSchema } from "@/schemas/auth";
 import { createTestPrisma, resetDatabase } from "./test-db";
@@ -14,8 +15,9 @@ afterAll(async () => {
   await prisma.$disconnect();
 });
 
-const register = (input: unknown) => registerUser(registerSchema.parse(input));
-const login = (input: unknown) => verifyCredentials(loginSchema.parse(input));
+const repos = createPrismaRepositories(prisma);
+const register = (input: unknown) => registerUser(repos, registerSchema.parse(input));
+const login = (input: unknown) => verifyCredentials(repos, loginSchema.parse(input));
 
 describe("registerUser", () => {
   it("guarda el email normalizado y la contraseña con Argon2id", async () => {

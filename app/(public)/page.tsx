@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { CalendarClock, ChevronRight, LayoutDashboard, Link2, SlidersHorizontal } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getServerRepos } from "@/lib/repositories/server";
 import { getSessionUserId } from "@/lib/session";
 import { cn } from "@/lib/utils";
 import { listDemoBusinesses } from "@/modules/businesses/public-pages.service";
@@ -124,7 +125,7 @@ async function OwnerActions() {
 async function BusinessList() {
   // Datos vivos de la BD: siempre en request time, nunca horneados en el build.
   await connection();
-  const businesses = await listDemoBusinesses();
+  const businesses = await listDemoBusinesses(getServerRepos());
   if (businesses.length === 0) {
     return (
       <p className="rounded-xl border border-dashed bg-card p-8 text-center text-muted-foreground">

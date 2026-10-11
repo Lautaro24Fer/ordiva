@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { ServicesManager } from "@/components/dashboard/services-manager";
 import { Skeleton } from "@/components/ui/skeleton";
 import { loadOwnedBusiness } from "@/lib/dashboard";
+import { getServerRepos } from "@/lib/repositories/server";
 import { listServices } from "@/modules/services/services.service";
 
 export const metadata: Metadata = { title: "Servicios" };
@@ -25,6 +26,6 @@ export default function ServicesPage({ params }: Props) {
 
 async function ServicesContent({ params }: Pick<Props, "params">) {
   const { userId, business } = await loadOwnedBusiness((await params).businessId);
-  const services = await listServices(userId, business.id);
+  const services = await listServices(getServerRepos(), userId, business.id);
   return <ServicesManager businessId={business.id} services={services} />;
 }

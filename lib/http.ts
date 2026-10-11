@@ -3,9 +3,12 @@ import { AppError, badRequest } from "@/lib/errors";
 
 type ErrorBody = { error: { code: string; message: string; details?: unknown } };
 
+function errorBody(code: string, message: string, details?: unknown): ErrorBody {
+  return { error: { code, message, ...(details !== undefined && { details }) } };
+}
+
 export function jsonError(status: number, code: string, message: string, details?: unknown): Response {
-  const body: ErrorBody = { error: { code, message, ...(details !== undefined && { details }) } };
-  return Response.json(body, { status });
+  return Response.json(errorBody(code, message, details), { status });
 }
 
 /** Detalles de validación sin eco de los valores recibidos (pueden contener PII). */
@@ -25,18 +28,24 @@ export function withErrorHandling<Args extends unknown[]>(
     try {
       return await handler(...args);
     } catch (error) {
-      if (error instanceof AppError) {
-        return jsonError(error.status, error.code, error.message, error.details);
-      }
-      if (error instanceof ZodError) {
-        return jsonError(400, "VALIDATION_ERROR", "Datos inválidos", zodDetails(error));
-      }
-      const name = error instanceof Error ? error.name : typeof error;
-      const code = (error as { code?: unknown } | null)?.code;
-      console.error("Error no controlado en Route Handler", { name, code });
-      return jsonError(500, "INTERNAL_ERROR", "Error interno del servidor");
+      const { status, body } = toErrorResponse(error);
+      return Response.json(body, { status });
     }
   };
+}
+
+/** Traducción de errores compartida con la API simulada del modo demo. */
+export function toErrorResponse(error: unknown): { status: number; body: ErrorBody } {
+  if (error instanceof AppError) {
+    return { status: error.status, body: errorBody(error.code, error.message, error.details) };
+  }
+  if (error instanceof ZodError) {
+    return { status: 400, body: errorBody("VALIDATION_ERROR", "Datos inválidos", zodDetails(error)) };
+  }
+  const name = error instanceof Error ? error.name : typeof error;
+  const code = (error as { code?: unknown } | null)?.code;
+  console.error("Error no controlado", { name, code });
+  return { status: 500, body: errorBody("INTERNAL_ERROR", "Error interno del servidor") };
 }
 
 /** Lee y valida el cuerpo JSON. */

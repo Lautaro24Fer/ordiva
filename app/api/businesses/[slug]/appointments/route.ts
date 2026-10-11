@@ -1,6 +1,7 @@
 import { badRequest, tooManyRequests } from "@/lib/errors";
 import { getClientIp, parseJsonBody, withErrorHandling } from "@/lib/http";
 import { publicBookingRateLimiter } from "@/lib/rate-limit";
+import { getServerRepos } from "@/lib/repositories/server";
 import { createPublicAppointment } from "@/modules/appointments/appointments.service";
 import { createPublicAppointmentSchema } from "@/schemas/appointments";
 
@@ -17,6 +18,6 @@ export const POST = withErrorHandling(async (request: Request, { params }: Ctx) 
   // Honeypot: un bot que completa todos los campos recibe un error genérico.
   if (input.website) throw badRequest("Solicitud inválida");
 
-  const appointment = await createPublicAppointment(slug, input);
+  const appointment = await createPublicAppointment(getServerRepos(), slug, input);
   return Response.json({ appointment }, { status: 201 });
 });

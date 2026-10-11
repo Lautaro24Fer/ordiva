@@ -7,6 +7,7 @@ import { signIn, signOut } from "@/lib/auth";
 import { AppError } from "@/lib/errors";
 import { getClientIp } from "@/lib/http";
 import { registerRateLimiter } from "@/lib/rate-limit";
+import { getServerRepos } from "@/lib/repositories/server";
 import { safeInternalPath } from "@/lib/safe-redirect";
 import { registerUser } from "@/modules/auth/auth.service";
 import { loginSchema, registerSchema } from "@/schemas/auth";
@@ -50,7 +51,7 @@ export async function registerAction(_prev: AuthFormState, formData: FormData): 
   }
 
   try {
-    await registerUser(parsed.data);
+    await registerUser(getServerRepos(), parsed.data);
   } catch (error) {
     if (error instanceof AppError && error.code === "EMAIL_TAKEN") {
       return { fieldErrors: { email: [error.message] }, values };

@@ -4,10 +4,11 @@ import { Suspense } from "react";
 import { PageShell } from "@/components/public/page-shell";
 import { ServiceCard } from "@/components/public/service-card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getServerRepos } from "@/lib/repositories/server";
 import { getBusinessPage } from "@/modules/businesses/public-pages.service";
 
 export async function generateMetadata({ params }: PageProps<"/b/[slug]">): Promise<Metadata> {
-  const data = await getBusinessPage((await params).slug);
+  const data = await getBusinessPage(getServerRepos(), (await params).slug);
   if (!data) return { title: "Negocio no encontrado" };
   return { title: data.business.name, description: data.business.description ?? undefined };
 }
@@ -24,7 +25,7 @@ export default function BusinessPage({ params }: PageProps<"/b/[slug]">) {
 
 async function BusinessContent({ params }: { params: PageProps<"/b/[slug]">["params"] }) {
   const { slug } = await params;
-  const data = await getBusinessPage(slug);
+  const data = await getBusinessPage(getServerRepos(), slug);
   if (!data) notFound();
   const { business, services } = data;
 

@@ -1,5 +1,7 @@
 import { afterAll, expect, it } from "vitest";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
+
+const prisma = getPrisma();
 
 afterAll(() => prisma.$disconnect());
 

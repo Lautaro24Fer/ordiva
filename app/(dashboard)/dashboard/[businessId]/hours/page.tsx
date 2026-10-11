@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { HoursEditor } from "@/components/dashboard/hours-editor";
 import { Skeleton } from "@/components/ui/skeleton";
 import { loadOwnedBusiness } from "@/lib/dashboard";
+import { getServerRepos } from "@/lib/repositories/server";
 import { getHours } from "@/modules/businesses/businesses.service";
 
 export const metadata: Metadata = { title: "Horarios" };
@@ -24,7 +25,7 @@ export default function HoursPage({ params }: Props) {
 
 async function HoursContent({ params }: Pick<Props, "params">) {
   const { userId, business } = await loadOwnedBusiness((await params).businessId);
-  const hours = await getHours(userId, business.id);
+  const hours = await getHours(getServerRepos(), userId, business.id);
   return (
     <>
       <p className="text-sm text-muted-foreground">Horarios en la zona del negocio ({business.timezone}).</p>

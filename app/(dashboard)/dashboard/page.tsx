@@ -4,6 +4,7 @@ import { ChevronRight, Plus } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getServerRepos } from "@/lib/repositories/server";
 import { requirePageUserId } from "@/lib/session";
 import { listOwnedBusinesses } from "@/modules/businesses/businesses.service";
 
@@ -26,7 +27,7 @@ export default function DashboardHome() {
 
 async function BusinessList() {
   const userId = await requirePageUserId();
-  const businesses = await listOwnedBusinesses(userId);
+  const businesses = await listOwnedBusinesses(getServerRepos(), userId);
 
   if (businesses.length === 0) {
     return (
