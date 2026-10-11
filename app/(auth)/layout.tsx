@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { Brand } from "@/components/public/brand";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
@@ -10,13 +11,16 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     <div className="flex min-h-full flex-1 flex-col bg-linear-to-b from-accent to-background">
       <header className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between gap-4 px-4">
         <Brand />
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1 rounded-md text-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
-        >
-          <ChevronLeft aria-hidden className="size-4" />
-          Volver al inicio
-        </Link>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1 rounded-md text-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
+          >
+            <ChevronLeft aria-hidden className="size-4" />
+            Volver al inicio
+          </Link>
+        </div>
       </header>
       <main className="flex flex-1 flex-col items-center justify-center px-4 py-12">
         <div className="flex w-full max-w-sm flex-col gap-6">

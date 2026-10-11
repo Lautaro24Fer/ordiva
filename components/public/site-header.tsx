@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { LayoutDashboard } from "lucide-react";
 import { Brand } from "@/components/public/brand";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getSessionUserId } from "@/lib/session";
@@ -16,12 +17,15 @@ export function SiteHeader() {
     <header className="border-b bg-background">
       <div className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between gap-4 px-4">
         <Brand />
-        <nav aria-label="Cuenta">
-          {/* La sesión se lee en request time: el resto del header queda estático. */}
-          <Suspense fallback={<Skeleton className="h-9 w-24 sm:w-60" />}>
-            <AccountLinks />
-          </Suspense>
-        </nav>
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
+          <nav aria-label="Cuenta">
+            {/* La sesión se lee en request time: el resto del header queda estático. */}
+            <Suspense fallback={<Skeleton className="h-9 w-24 sm:w-60" />}>
+              <AccountLinks />
+            </Suspense>
+          </nav>
+        </div>
       </div>
     </header>
   );

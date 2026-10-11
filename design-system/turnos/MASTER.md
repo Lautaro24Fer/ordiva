@@ -9,7 +9,9 @@ ajustada a la marca teal elegida el 2026-10-11.
 - **Estilo:** Soft UI Evolution + Flat. Superficies claras, bordes suaves, sombras sutiles, foco siempre visible.
 - **Densidad:** estándar (escala de espaciado 16–64 px en páginas públicas; más compacta en el panel).
 - **Movimiento:** sutil (150–300 ms, solo `opacity`/`transform`); respetar `prefers-reduced-motion`.
-- **Modo oscuro:** tokens definidos pero no es prioridad de producto (no hay toggle).
+- **Modo oscuro:** soportado. Por defecto sigue al sistema; el selector (Claro / Oscuro / Sistema) está en
+  todos los headers y guarda la elección en `localStorage` (`lib/theme.ts`). Un script en `<head>` aplica la
+  clase `dark` antes del primer pintado para evitar destellos.
 
 ## Tokens (3 capas, en `app/globals.css`)
 
@@ -31,7 +33,8 @@ Regla: los componentes nunca usan primitivos ni hex sueltos; solo clases semánt
 | Error | `--destructive` | red-600 | errores, cancelar |
 
 Contrastes verificados (WCAG AA ≥ 4.5:1): texto principal 17.3, secundario 6.0, texto sobre primario 5.2,
-primario sobre fondo 5.2, éxito 5.2, aviso 4.9. En oscuro, todos ≥ 7.
+primario sobre fondo 5.2, éxito 5.2, aviso 4.9. En oscuro: texto 17.5, secundario 7.8, texto sobre primario 7.8,
+badge de éxito 6.0, destructivo sobre su tinte 4.6; anillo de foco 5.2 (mínimo 3 para UI).
 
 ## Tipografía
 
@@ -55,7 +58,7 @@ primario sobre fondo 5.2, éxito 5.2, aviso 4.9. En oscuro, todos ≥ 7.
 
 ## Checklist previo a entregar
 
-- [ ] Contraste ≥ 4.5:1 en texto
+- [ ] Contraste ≥ 4.5:1 en texto, en claro y en oscuro
 - [ ] Foco visible en todo lo operable; orden de tabulación = orden visual
 - [ ] Áreas táctiles ≥ 24 px (objetivo 36–44 px en móvil)
 - [ ] 375 / 768 / 1024 / 1440 px sin scroll horizontal

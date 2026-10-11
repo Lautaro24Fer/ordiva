@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Brand } from "@/components/public/brand";
 import { UserMenu } from "@/components/dashboard/user-menu";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Toaster } from "@/components/ui/sonner";
 import { getSession } from "@/lib/session";
@@ -20,9 +21,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <Brand />
             <span className="rounded-full border px-2 py-0.5 text-xs text-muted-foreground">Panel</span>
           </div>
-          <Suspense fallback={<Skeleton className="h-9 w-10 sm:w-56" />}>
-            <AccountMenu />
-          </Suspense>
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <Suspense fallback={<Skeleton className="h-9 w-10 sm:w-56" />}>
+              <AccountMenu />
+            </Suspense>
+          </div>
         </div>
       </header>
       <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6 sm:py-8">{children}</main>
