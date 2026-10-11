@@ -1,0 +1,16 @@
+# Lo que no entra al contexto de build de la imagen.
+.git
+.github
+.claude
+.next
+.vercel
+node_modules
+generated
+coverage
+tests
+design-system
+*.tsbuildinfo
+.env*
+!.env.example
+Dockerfile
+docker-compose.yml

@@ -1,6 +1,8 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { authConfig } from "@/lib/auth.config";
+import { verifyDemoCredentials } from "@/lib/demo/auth";
+import { IS_DEMO } from "@/lib/demo/flag";
 import { getClientIp } from "@/lib/http";
 import { loginRateLimiter } from "@/lib/rate-limit";
 import { getServerRepos } from "@/lib/repositories/server";
@@ -29,7 +31,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const key = `${getClientIp(request)}:${parsed.data.email}`;
         if (!(await loginRateLimiter.consume(key))) return null;
 
-        const user = await verifyCredentials(getServerRepos(), parsed.data);
+        const user = IS_DEMO
+          ? verifyDemoCredentials(parsed.data)
+          : await verifyCredentials(getServerRepos(), parsed.data);
         return user ? { id: String(user.id), name: user.name, email: user.email } : null;
       },
     }),

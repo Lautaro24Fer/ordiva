@@ -1,4 +1,5 @@
 import { ZodError, type ZodType, type z } from "zod";
+import { IS_DEMO } from "@/lib/demo/flag";
 import { AppError, badRequest } from "@/lib/errors";
 
 type ErrorBody = { error: { code: string; message: string; details?: unknown } };
@@ -25,6 +26,8 @@ export function withErrorHandling<Args extends unknown[]>(
   handler: (...args: Args) => Promise<Response>,
 ): (...args: Args) => Promise<Response> {
   return async (...args) => {
+    // Demo: no hay base de datos; la API corre en el navegador (lib/demo/api-router).
+    if (IS_DEMO) return jsonError(404, "NOT_FOUND", "La API no está disponible en la demo");
     try {
       return await handler(...args);
     } catch (error) {

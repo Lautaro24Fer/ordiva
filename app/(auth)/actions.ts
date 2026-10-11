@@ -4,6 +4,8 @@ import { AuthError } from "next-auth";
 import { headers } from "next/headers";
 import { z } from "zod";
 import { signIn, signOut } from "@/lib/auth";
+import { IS_DEMO } from "@/lib/demo/flag";
+import { DEMO_ACCOUNTS, DEMO_PASSWORD } from "@/lib/demo/seed-data";
 import { AppError } from "@/lib/errors";
 import { getClientIp } from "@/lib/http";
 import { registerRateLimiter } from "@/lib/rate-limit";
@@ -39,7 +41,27 @@ export async function loginAction(_prev: AuthFormState, formData: FormData): Pro
   return {};
 }
 
+/** Demo: entra con una de las cuentas sembradas (botón "Entrar como …"). */
+export async function demoLoginAction(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
+  const account = DEMO_ACCOUNTS.find((a) => a.email === formData.get("email"));
+  if (!IS_DEMO || !account) return { error: "Cuenta demo inválida." };
+
+  try {
+    await signIn("credentials", {
+      email: account.email,
+      password: DEMO_PASSWORD,
+      redirectTo: safeInternalPath(formData.get("callbackUrl")),
+    });
+  } catch (error) {
+    if (error instanceof AuthError) return { error: "No se pudo ingresar. Probá de nuevo en unos minutos." };
+    throw error; // La redirección de éxito se propaga como excepción de Next.
+  }
+  return {};
+}
+
 export async function registerAction(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
+  if (IS_DEMO) return { error: "El registro está desactivado en la demo. Ingresá con una cuenta demo." };
+
   const values = { name: String(formData.get("name") ?? ""), email: String(formData.get("email") ?? "") };
   const parsed = registerSchema.safeParse({ ...values, password: formData.get("password") });
   if (!parsed.success) {

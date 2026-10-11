@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ServicesManager } from "@/components/dashboard/services-manager";
+import { DemoServices } from "@/components/demo/demo-pages";
 import { Skeleton } from "@/components/ui/skeleton";
-import { loadOwnedBusiness } from "@/lib/dashboard";
+import { loadDashboardParams, loadOwnedBusiness } from "@/lib/dashboard";
+import { IS_DEMO } from "@/lib/demo/flag";
 import { getServerRepos } from "@/lib/repositories/server";
 import { listServices } from "@/modules/services/services.service";
 
@@ -25,7 +27,10 @@ export default function ServicesPage({ params }: Props) {
 }
 
 async function ServicesContent({ params }: Pick<Props, "params">) {
-  const { userId, business } = await loadOwnedBusiness((await params).businessId);
+  const { businessId } = await params;
+  if (IS_DEMO) return <DemoServices {...await loadDashboardParams(businessId)} />;
+
+  const { userId, business } = await loadOwnedBusiness(businessId);
   const services = await listServices(getServerRepos(), userId, business.id);
   return <ServicesManager businessId={business.id} services={services} />;
 }

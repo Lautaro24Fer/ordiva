@@ -6,6 +6,7 @@ import type { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { apiRequest } from "@/lib/api-client";
 import { bookingFormSchema } from "@/schemas/appointments";
 
 type FormInput = z.input<typeof bookingFormSchema>;
@@ -29,9 +30,10 @@ type BookingFormProps = {
 };
 
 /** Mensajes para errores que el servidor puede devolver aunque el formulario sea válido. */
-function serverErrorMessage(status: number, message?: string): string {
+function serverErrorMessage(status: number, message: string): string {
+  if (status === 0) return message; // Sin conexión: el mensaje ya lo arma apiRequest.
   if (status === 429) return "Hiciste demasiados intentos. Esperá unos minutos y probá de nuevo.";
-  if (status >= 500 || !message) return "No pudimos confirmar el turno. Probá de nuevo en unos segundos.";
+  if (status >= 500) return "No pudimos confirmar el turno. Probá de nuevo en unos segundos.";
   return message;
 }
 
@@ -43,20 +45,14 @@ export function BookingForm({ slug, serviceId, startAt, onBooked, onSlotTaken }:
   const { errors, isSubmitting } = form.formState;
 
   async function onSubmit(values: FormOutput) {
-    try {
-      const res = await fetch(`/api/businesses/${slug}/appointments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ serviceId, startAt, ...values }),
-      });
-      const body = await res.json().catch(() => null);
-
-      if (res.status === 201) return onBooked(body.appointment);
-      if (res.status === 409) return onSlotTaken();
-      form.setError("root", { message: serverErrorMessage(res.status, body?.error?.message) });
-    } catch {
-      form.setError("root", { message: "Error de conexión. Revisá tu internet y probá de nuevo." });
-    }
+    const result = await apiRequest<{ appointment: BookedAppointment }>(
+      `/api/businesses/${slug}/appointments`,
+      "POST",
+      { serviceId, startAt, ...values },
+    );
+    if (result.ok) return onBooked(result.data.appointment);
+    if (result.status === 409) return onSlotTaken();
+    form.setError("root", { message: serverErrorMessage(result.status, result.message) });
   }
 
   return (

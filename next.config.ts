@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Build autocontenido para la imagen Docker (ver Dockerfile). En Vercel no tiene efecto.
+  output: "standalone",
   experimental: {
     agentFeedback: true,
   },

@@ -65,3 +65,35 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  # La demo de Vercel compila sin base de datos: sin servicio PostgreSQL ni
+  # DATABASE_URL/DIRECT_URL (si algo vuelve a tocar la BD en el build, falla acá).
+  demo-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_PUBLIC_DEMO_MODE: "1"
+      AUTH_SECRET: ci-only-not-a-real-secret
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies (incluye prisma generate)
+        run: npm ci
+
+      - name: Build (modo demo)
+        run: npm run build
+
+  # Imagen de producción (modo real). El build tampoco necesita base de datos.
+  docker-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build de la imagen (target runner)
+        run: docker build --target runner -t ordiva:ci .

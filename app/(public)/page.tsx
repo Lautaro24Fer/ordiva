@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { CalendarClock, ChevronRight, LayoutDashboard, Link2, SlidersHorizontal } from "lucide-react";
+import { CalendarClock, LayoutDashboard, Link2, SlidersHorizontal } from "lucide-react";
+import { DemoBusinessDirectory } from "@/components/demo/demo-pages";
+import { BusinessDirectory, BusinessDirectorySkeleton } from "@/components/public/business-directory";
 import { buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { IS_DEMO } from "@/lib/demo/flag";
 import { getServerRepos } from "@/lib/repositories/server";
 import { getSessionUserId } from "@/lib/session";
 import { cn } from "@/lib/utils";
@@ -61,9 +64,11 @@ export default function HomePage() {
           <h2 id="negocios-title" className="text-2xl font-semibold tracking-tight">
             Elegí dónde reservar
           </h2>
-          <p className="text-muted-foreground">Negocios de demostración con datos ficticios.</p>
+          <p className="text-muted-foreground">
+            {IS_DEMO ? "Negocios de demostración con datos ficticios." : "Negocios que reciben reservas online."}
+          </p>
         </div>
-        <Suspense fallback={<BusinessListSkeleton />}>
+        <Suspense fallback={<BusinessDirectorySkeleton />}>
           <BusinessList />
         </Suspense>
       </section>
@@ -112,54 +117,21 @@ async function OwnerActions() {
   }
   return (
     <>
-      <Link href="/register" className={cn(buttonVariants({ size: "lg" }), heroButton)}>
-        Crear cuenta
+      <Link href={IS_DEMO ? "/login" : "/register"} className={cn(buttonVariants({ size: "lg" }), heroButton)}>
+        {IS_DEMO ? "Probar el panel" : "Crear cuenta"}
       </Link>
-      <Link href="/login" className={cn(buttonVariants({ variant: "ghost", size: "lg" }), heroButton)}>
-        Ya tengo cuenta
-      </Link>
+      {!IS_DEMO && (
+        <Link href="/login" className={cn(buttonVariants({ variant: "ghost", size: "lg" }), heroButton)}>
+          Ya tengo cuenta
+        </Link>
+      )}
     </>
   );
 }
 
 async function BusinessList() {
+  if (IS_DEMO) return <DemoBusinessDirectory />;
   // Datos vivos de la BD: siempre en request time, nunca horneados en el build.
   await connection();
-  const businesses = await listDemoBusinesses(getServerRepos());
-  if (businesses.length === 0) {
-    return (
-      <p className="rounded-xl border border-dashed bg-card p-8 text-center text-muted-foreground">
-        Todavía no hay negocios publicados.
-      </p>
-    );
-  }
-  return (
-    <ul className="grid gap-3 sm:grid-cols-2">
-      {businesses.map((business) => (
-        <li key={business.slug}>
-          <Link
-            href={`/b/${business.slug}`}
-            className="flex h-full items-center justify-between gap-4 rounded-xl border bg-card p-4 transition-colors outline-none hover:border-primary/40 hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring/50"
-          >
-            <span className="flex flex-col gap-0.5">
-              <span className="font-medium">{business.name}</span>
-              {business.description && (
-                <span className="text-sm text-muted-foreground">{business.description}</span>
-              )}
-            </span>
-            <ChevronRight aria-hidden className="size-4 shrink-0 text-muted-foreground" />
-          </Link>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function BusinessListSkeleton() {
-  return (
-    <div className="grid gap-3 sm:grid-cols-2" aria-busy="true" aria-label="Cargando negocios">
-      <Skeleton className="h-18 rounded-xl" />
-      <Skeleton className="h-18 rounded-xl" />
-    </div>
-  );
+  return <BusinessDirectory businesses={await listDemoBusinesses(getServerRepos())} />;
 }

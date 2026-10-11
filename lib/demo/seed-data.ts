@@ -89,3 +89,14 @@ export function seedAppointmentStart(
   if (!startAt) throw new Error(`Hora local inválida en seed: ${localDate} ${appt.time}`);
   return startAt;
 }
+
+/**
+ * Cuentas de la demo sin base de datos. Los ids coinciden con los que asigna
+ * `createSeedState` (lib/demo/store.ts), que recorre `SEED_DATA` en orden.
+ */
+export const DEMO_ACCOUNTS = SEED_DATA.map((data, index) => ({
+  id: index + 1,
+  name: data.owner.name,
+  email: data.owner.email,
+  businessName: data.business.name,
+}));

@@ -8,6 +8,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BookingForm, type BookedAppointment } from "@/components/public/booking-form";
+import { apiRequest } from "@/lib/api-client";
 import { formatDuration, formatPrice } from "@/lib/format-display";
 import { cn } from "@/lib/utils";
 import type { BookingDay } from "@/modules/availability/booking-days";
@@ -67,21 +68,12 @@ export function BookingFlow({ slug, businessName, timezone, services, days, init
     const requestId = ++latestRequest.current;
     setSelectedSlot(undefined);
     setSlotsState({ status: "loading" });
-    try {
-      const params = new URLSearchParams({ serviceId: String(nextServiceId), date: nextDate });
-      const res = await fetch(`/api/businesses/${slug}/availability?${params}`, { cache: "no-store" });
-      const body = await res.json();
-      if (requestId !== latestRequest.current) return;
-      if (!res.ok) {
-        setSlotsState({ status: "error", message: body?.error?.message ?? "No pudimos cargar los horarios." });
-        return;
-      }
-      setSlotsState({ status: "ready", slots: body.slots });
-    } catch {
-      if (requestId === latestRequest.current) {
-        setSlotsState({ status: "error", message: "Error de conexión. Revisá tu internet y probá de nuevo." });
-      }
-    }
+    const params = new URLSearchParams({ serviceId: String(nextServiceId), date: nextDate });
+    const result = await apiRequest<{ slots: Slot[] }>(`/api/businesses/${slug}/availability?${params}`, "GET");
+    if (requestId !== latestRequest.current) return;
+    setSlotsState(
+      result.ok ? { status: "ready", slots: result.data.slots } : { status: "error", message: result.message },
+    );
   }
 
   function selectService(id: number) {

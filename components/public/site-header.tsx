@@ -5,6 +5,7 @@ import { Brand } from "@/components/public/brand";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { IS_DEMO } from "@/lib/demo/flag";
 import { getSessionUserId } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
@@ -45,8 +46,11 @@ async function AccountLinks() {
       <Link href="/login" className={buttonVariants({ variant: "ghost", size: "lg" })}>
         Ingresar
       </Link>
-      <Link href="/register" className={cn(buttonVariants({ variant: "outline", size: "lg" }), "hidden sm:inline-flex")}>
-        Registrá tu negocio
+      <Link
+        href={IS_DEMO ? "/login" : "/register"}
+        className={cn(buttonVariants({ variant: "outline", size: "lg" }), "hidden sm:inline-flex")}
+      >
+        {IS_DEMO ? "Probar el panel" : "Registrá tu negocio"}
       </Link>
     </div>
   );

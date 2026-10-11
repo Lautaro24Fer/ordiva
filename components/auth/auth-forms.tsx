@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
-import { loginAction, registerAction, type AuthFormState } from "@/app/(auth)/actions";
+import { demoLoginAction, loginAction, registerAction, type AuthFormState } from "@/app/(auth)/actions";
 import { PasswordInput } from "@/components/auth/password-input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { IS_DEMO } from "@/lib/demo/flag";
+import { DEMO_ACCOUNTS } from "@/lib/demo/seed-data";
 import { PASSWORD_MIN_LENGTH } from "@/schemas/auth";
 
 const toErrors = (messages?: string[]) => messages?.map((message) => ({ message }));
@@ -45,13 +47,56 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
           <Button type="submit" size="lg" disabled={pending}>
             {pending ? "Ingresando…" : "Ingresar"}
           </Button>
-          <p className="text-center text-sm text-muted-foreground">
-            ¿No tenés cuenta?{" "}
-            <Link href="/register" className="font-medium text-foreground underline-offset-4 hover:underline">
-              Creala acá
-            </Link>
-          </p>
+          {!IS_DEMO && (
+            <p className="text-center text-sm text-muted-foreground">
+              ¿No tenés cuenta?{" "}
+              <Link href="/register" className="font-medium text-foreground underline-offset-4 hover:underline">
+                Creala acá
+              </Link>
+            </p>
+          )}
         </CardFooter>
+      </form>
+    </Card>
+  );
+}
+
+/** Demo: ingreso en un clic con las cuentas sembradas (sin contraseña a la vista). */
+export function DemoAccounts({ callbackUrl }: { callbackUrl?: string }) {
+  const [state, action, pending] = useActionState<AuthFormState, FormData>(demoLoginAction, {});
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-xl">Probá el panel</CardTitle>
+        <CardDescription>
+          Entrá como dueño de un negocio de ejemplo. Los cambios se guardan solo en este navegador.
+        </CardDescription>
+      </CardHeader>
+      <form action={action}>
+        <CardContent className="flex flex-col gap-3">
+          {state.error && (
+            <Alert variant="destructive">
+              <AlertDescription>{state.error}</AlertDescription>
+            </Alert>
+          )}
+          {DEMO_ACCOUNTS.map((account) => (
+            <Button
+              key={account.email}
+              type="submit"
+              name="email"
+              value={account.email}
+              size="lg"
+              variant="outline"
+              disabled={pending}
+              className="h-auto flex-col items-start gap-0.5 py-2.5 text-left"
+            >
+              <span>Entrar como {account.name.split(" ")[0]}</span>
+              <span className="text-xs font-normal text-muted-foreground">{account.businessName}</span>
+            </Button>
+          ))}
+          {callbackUrl && <input type="hidden" name="callbackUrl" value={callbackUrl} />}
+        </CardContent>
       </form>
     </Card>
   );

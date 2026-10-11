@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { HoursEditor } from "@/components/dashboard/hours-editor";
+import { DemoHours } from "@/components/demo/demo-pages";
 import { Skeleton } from "@/components/ui/skeleton";
-import { loadOwnedBusiness } from "@/lib/dashboard";
+import { loadDashboardParams, loadOwnedBusiness } from "@/lib/dashboard";
+import { IS_DEMO } from "@/lib/demo/flag";
 import { getServerRepos } from "@/lib/repositories/server";
 import { getHours } from "@/modules/businesses/businesses.service";
 
@@ -24,7 +26,10 @@ export default function HoursPage({ params }: Props) {
 }
 
 async function HoursContent({ params }: Pick<Props, "params">) {
-  const { userId, business } = await loadOwnedBusiness((await params).businessId);
+  const { businessId } = await params;
+  if (IS_DEMO) return <DemoHours {...await loadDashboardParams(businessId)} />;
+
+  const { userId, business } = await loadOwnedBusiness(businessId);
   const hours = await getHours(getServerRepos(), userId, business.id);
   return (
     <>

@@ -1,4 +1,6 @@
-# Solo PostgreSQL; Next.js corre en el host (npm run dev).
+# Desarrollo:   `npm run db:up` levanta solo PostgreSQL (Next.js corre en el host).
+# Instalación:  `docker compose --profile full up -d --build` levanta PostgreSQL,
+#               aplica migraciones (y el seed si SEED=1) y sirve la app en :3000.
 # Puerto 5433 en el host para no chocar con un PostgreSQL local en 5432.
 services:
   postgres:
@@ -7,7 +9,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: booking
-      POSTGRES_PASSWORD: booking
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-booking}
       POSTGRES_DB: booking
     ports:
       - "5433:5432"
@@ -19,6 +21,37 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+
+  migrate:
+    profiles: [full]
+    build:
+      context: .
+      target: migrator
+    environment:
+      DIRECT_URL: postgresql://booking:${POSTGRES_PASSWORD:-booking}@postgres:5432/booking?schema=public
+      DATABASE_URL: postgresql://booking:${POSTGRES_PASSWORD:-booking}@postgres:5432/booking?schema=public
+      SEED: ${SEED:-0}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  app:
+    profiles: [full]
+    build:
+      context: .
+      target: runner
+    container_name: ordiva-app
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://booking:${POSTGRES_PASSWORD:-booking}@postgres:5432/booking?schema=public
+      AUTH_SECRET: ${AUTH_SECRET:-}  # obligatorio: generalo con `openssl rand -base64 33`
+      AUTH_URL: ${AUTH_URL:-http://localhost:3000}
+      AUTH_TRUST_HOST: "true"
+    ports:
+      - "3000:3000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
 
 volumes:
   booking-pgdata:

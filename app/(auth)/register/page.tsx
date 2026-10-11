@@ -6,6 +6,7 @@ import { RegisterForm } from "@/components/auth/auth-forms";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { IS_DEMO } from "@/lib/demo/flag";
 import { getSession } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Crear cuenta" };
@@ -23,6 +24,7 @@ export default function RegisterPage() {
  * no funcionaba): se explica y se ofrece salir para registrar otra cuenta.
  */
 async function RegisterContent() {
+  if (IS_DEMO) return <RegisterDisabled />;
   const session = await getSession();
   if (!session?.user) return <RegisterForm />;
 
@@ -45,6 +47,25 @@ async function RegisterContent() {
             Salir y crear otra cuenta
           </Button>
         </form>
+      </CardFooter>
+    </Card>
+  );
+}
+
+/** Demo sin base de datos: no hay alta de cuentas, se usan las cuentas de ejemplo. */
+function RegisterDisabled() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-xl">Registro desactivado en la demo</CardTitle>
+        <CardDescription>
+          Esta es una demo sin base de datos. Para probar el panel, ingresá con una de las cuentas de ejemplo.
+        </CardDescription>
+      </CardHeader>
+      <CardFooter className="mt-4 flex flex-col items-stretch gap-3">
+        <Link href="/login" className={buttonVariants({ size: "lg" })}>
+          Probar el panel
+        </Link>
       </CardFooter>
     </Card>
   );
