@@ -120,75 +120,80 @@ export function BookingFlow({ slug, businessName, timezone, services, days, init
 
   return (
     <div className="flex flex-col gap-8">
-      <Step number={1} status={statusOf(1)} title="Elegí el servicio">
-        <div className="grid gap-2 sm:grid-cols-2" role="group" aria-label="Servicios">
-          {services.map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              aria-pressed={s.id === serviceId}
-              onClick={() => selectService(s.id)}
-              className={cn(
-                "flex flex-col items-start gap-1 rounded-xl border bg-card p-3 text-left text-sm transition-colors outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50",
-                s.id === serviceId && "border-primary bg-primary/5 hover:bg-primary/10",
-              )}
-            >
-              <span className="font-medium">{s.name}</span>
-              <span className="text-muted-foreground">
-                {formatDuration(s.durationMinutes)} · {formatPrice(s.price)}
-              </span>
-            </button>
-          ))}
-        </div>
-      </Step>
-
-      <Step number={2} status={statusOf(2)} title="Elegí el día">
-        {/* El degradado del borde indica que la fila sigue y se puede deslizar. */}
-        <div className="relative -mx-4">
-          <div className="flex snap-x scroll-px-4 gap-2 overflow-x-auto px-4 pb-2" role="group" aria-label="Días disponibles">
-            {days.map((d) => (
+      {/* La barra resumen es sticky dentro de este bloque: acompaña los pasos 1–3 y nunca tapa el formulario. */}
+      <div className="flex flex-col gap-8">
+        <Step number={1} status={statusOf(1)} title="Elegí el servicio">
+          <div className="grid gap-2 sm:grid-cols-2" role="group" aria-label="Servicios">
+            {services.map((s) => (
               <button
-                key={d.date}
+                key={s.id}
                 type="button"
-                disabled={!d.isOpen}
-                aria-pressed={d.date === date}
-                aria-label={`${d.weekday} ${d.label}${d.isOpen ? "" : ", cerrado"}`}
-                onClick={() => selectDate(d.date)}
+                aria-pressed={s.id === serviceId}
+                onClick={() => selectService(s.id)}
                 className={cn(
-                  "flex h-18 w-16 shrink-0 snap-start flex-col items-center justify-center gap-0.5 rounded-xl border bg-card text-sm transition-colors outline-none hover:border-primary/40 hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring/50",
-                  "disabled:pointer-events-none disabled:border-dashed disabled:bg-muted disabled:text-muted-foreground",
-                  d.date === date && "border-primary bg-primary text-primary-foreground hover:bg-primary/90",
+                  "flex flex-col items-start gap-1 rounded-xl border bg-card p-3 text-left text-sm transition-colors outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50",
+                  s.id === serviceId && "border-primary bg-primary/5 hover:bg-primary/10",
                 )}
               >
-                <span className="text-xs uppercase opacity-80">{d.weekday}</span>
-                <span className="font-medium">{d.label}</span>
-                {!d.isOpen && <span className="text-xs">Cerrado</span>}
+                <span className="font-medium">{s.name}</span>
+                <span className="text-muted-foreground">
+                  {formatDuration(s.durationMinutes)} · {formatPrice(s.price)}
+                </span>
               </button>
             ))}
           </div>
-          <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-linear-to-l from-background" />
-        </div>
-      </Step>
+        </Step>
 
-      <Step number={3} status={statusOf(3)} title="Elegí el horario" description={`Horarios en hora de ${zoneCity(timezone)}.`}>
-        {notice && (
-          <Alert>
-            <TriangleAlert aria-hidden />
-            <AlertTitle>Horario no disponible</AlertTitle>
-            <AlertDescription>{notice}</AlertDescription>
-          </Alert>
-        )}
-        <SlotPicker
-          state={slotsState}
-          canLoad={Boolean(service && day)}
-          selected={selectedSlot}
-          onSelect={(slot) => {
-            setSelectedSlot(slot);
-            setNotice(undefined);
-          }}
-          onRetry={() => serviceId && date && loadSlots(serviceId, date)}
-        />
-      </Step>
+        <Step number={2} status={statusOf(2)} title="Elegí el día">
+          {/* El degradado del borde indica que la fila sigue y se puede deslizar. */}
+          <div className="relative -mx-4">
+            <div className="flex snap-x scroll-px-4 gap-2 overflow-x-auto px-4 pb-2" role="group" aria-label="Días disponibles">
+              {days.map((d) => (
+                <button
+                  key={d.date}
+                  type="button"
+                  disabled={!d.isOpen}
+                  aria-pressed={d.date === date}
+                  aria-label={`${d.weekday} ${d.label}${d.isOpen ? "" : ", cerrado"}`}
+                  onClick={() => selectDate(d.date)}
+                  className={cn(
+                    "flex h-18 w-16 shrink-0 snap-start flex-col items-center justify-center gap-0.5 rounded-xl border bg-card text-sm transition-colors outline-none hover:border-primary/40 hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring/50",
+                    "disabled:pointer-events-none disabled:border-dashed disabled:bg-muted disabled:text-muted-foreground",
+                    d.date === date && "border-primary bg-primary text-primary-foreground hover:bg-primary/90",
+                  )}
+                >
+                  <span className="text-xs uppercase opacity-80">{d.weekday}</span>
+                  <span className="font-medium">{d.label}</span>
+                  {!d.isOpen && <span className="text-xs">Cerrado</span>}
+                </button>
+              ))}
+            </div>
+            <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-linear-to-l from-background" />
+          </div>
+        </Step>
+
+        <Step number={3} status={statusOf(3)} title="Elegí el horario" description={`Horarios en hora de ${zoneCity(timezone)}.`}>
+          {notice && (
+            <Alert>
+              <TriangleAlert aria-hidden />
+              <AlertTitle>Horario no disponible</AlertTitle>
+              <AlertDescription>{notice}</AlertDescription>
+            </Alert>
+          )}
+          <SlotPicker
+            state={slotsState}
+            canLoad={Boolean(service && day)}
+            selected={selectedSlot}
+            onSelect={(slot) => {
+              setSelectedSlot(slot);
+              setNotice(undefined);
+            }}
+            onRetry={() => serviceId && date && loadSlots(serviceId, date)}
+          />
+        </Step>
+
+        {service && <MobileSummary service={service} day={day} slot={selectedSlot} />}
+      </div>
 
       {service && day && selectedSlot && (
         <Step number={4} status={statusOf(4)} title="Tus datos" headingRef={revealOnMount}>
@@ -208,6 +213,33 @@ export function BookingFlow({ slug, businessName, timezone, services, days, init
         </Step>
       )}
     </div>
+  );
+}
+
+/** Solo en móvil: lo elegido hasta ahora queda a la vista mientras se recorre la lista de días y horarios. */
+function MobileSummary({ service, day, slot }: { service: PublicService; day?: BookingDay; slot?: Slot }) {
+  const when = day ? `${day.weekday} ${day.label}${slot ? ` a las ${slot.label}` : ""}` : undefined;
+  const hint = !day ? "Elegí un día" : !slot ? "Elegí un horario" : undefined;
+
+  return (
+    <aside
+      aria-label="Resumen de tu reserva"
+      className="sticky bottom-0 z-10 -mx-4 flex items-center justify-between gap-3 border-t bg-background/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur sm:hidden"
+    >
+      <div className="flex min-w-0 flex-col">
+        <span className="truncate text-sm font-medium">
+          {service.name} · {formatPrice(service.price)}
+        </span>
+        <span className="truncate text-sm text-muted-foreground first-letter:uppercase">
+          {[when, hint].filter(Boolean).join(" · ")}
+        </span>
+      </div>
+      {slot && (
+        <Button size="lg" className="shrink-0" onClick={() => revealOnMount(document.getElementById("step-4"))}>
+          Continuar
+        </Button>
+      )}
+    </aside>
   );
 }
 
