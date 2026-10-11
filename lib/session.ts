@@ -1,18 +1,20 @@
 import "server-only";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
+import { cache } from "react";
 import { auth } from "@/lib/auth";
 import { unauthorized } from "@/lib/errors";
 
 /**
  * Sesión del request actual. `connection()` marca la lectura como request-time:
  * Auth.js usa valores aleatorios (token CSRF) que Cache Components no permite
- * durante el prerender.
+ * durante el prerender. `cache` la deduplica: header, página y footer la leen
+ * en el mismo request.
  */
-export async function getSession() {
+export const getSession = cache(async () => {
   await connection();
   return auth();
-}
+});
 
 /** Id del administrador autenticado, o `null` si no hay sesión válida. */
 export async function getSessionUserId(): Promise<number | null> {

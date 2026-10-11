@@ -66,6 +66,7 @@ export async function registerAction(_prev: AuthFormState, formData: FormData): 
   return {};
 }
 
-export async function logoutAction(): Promise<void> {
-  await signOut({ redirectTo: "/" });
+/** Cierra la sesión. Un form puede indicar a dónde volver con un campo `redirectTo` (solo rutas internas). */
+export async function logoutAction(formData?: FormData): Promise<void> {
+  await signOut({ redirectTo: safeInternalPath(formData?.get("redirectTo"), "/") });
 }

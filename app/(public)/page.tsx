@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { CalendarClock, ChevronRight, Link2, SlidersHorizontal } from "lucide-react";
+import { CalendarClock, ChevronRight, LayoutDashboard, Link2, SlidersHorizontal } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getSessionUserId } from "@/lib/session";
 import { cn } from "@/lib/utils";
 import { listDemoBusinesses } from "@/modules/businesses/public-pages.service";
 
@@ -88,16 +89,35 @@ export default function HomePage() {
             ))}
           </ul>
           <div className="flex flex-wrap items-center gap-3">
-            <Link href="/register" className={cn(buttonVariants({ size: "lg" }), heroButton)}>
-              Crear cuenta
-            </Link>
-            <Link href="/login" className={cn(buttonVariants({ variant: "ghost", size: "lg" }), heroButton)}>
-              Ya tengo cuenta
-            </Link>
+            <Suspense fallback={<Skeleton className="h-11 w-36 rounded-lg" />}>
+              <OwnerActions />
+            </Suspense>
           </div>
         </div>
       </section>
     </main>
+  );
+}
+
+/** Con sesión iniciada, "Crear cuenta" no aplica: se ofrece volver al panel. */
+async function OwnerActions() {
+  if ((await getSessionUserId()) !== null) {
+    return (
+      <Link href="/dashboard" className={cn(buttonVariants({ size: "lg" }), heroButton)}>
+        <LayoutDashboard aria-hidden />
+        Ir a mi panel
+      </Link>
+    );
+  }
+  return (
+    <>
+      <Link href="/register" className={cn(buttonVariants({ size: "lg" }), heroButton)}>
+        Crear cuenta
+      </Link>
+      <Link href="/login" className={cn(buttonVariants({ variant: "ghost", size: "lg" }), heroButton)}>
+        Ya tengo cuenta
+      </Link>
+    </>
   );
 }
 
